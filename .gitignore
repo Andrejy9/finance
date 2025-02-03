@@ -1,0 +1,20 @@
+# Escludi i file di Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Escludi il virtual environment (venv)
+venv/
+.venv/
+
+# Escludi le librerie installate
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Escludi i file di sistema di macOS
+.DS_Store
+
+# Escludi i file di configurazione di VS Code
+.vscode/
