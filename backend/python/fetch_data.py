@@ -36,7 +36,7 @@ def get_stock_data(ticker):
 
 if __name__ == "__main__":
     # Default a AAPL se nessun ticker è specificato
-    ticker = sys.argv[1] if len(sys.argv) > 1 else "AAPL"
+    ticker = sys.argv[1] if len(sys.argv) > 1 else "SOXX"
     
     result = get_stock_data(ticker)
     

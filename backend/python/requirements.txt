@@ -1,0 +1,27 @@
+altgraph @ file:///AppleInternal/Library/BuildRoots/2c89a47b-9dd5-11ef-938f-6e654a286000/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
+beautifulsoup4==4.13.3
+certifi==2025.1.31
+charset-normalizer==3.4.1
+dnspython==2.7.0
+frozendict==2.4.6
+future @ file:///AppleInternal/Library/BuildRoots/2c89a47b-9dd5-11ef-938f-6e654a286000/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
+html5lib==1.1
+idna==3.10
+lxml==5.3.0
+macholib @ file:///AppleInternal/Library/BuildRoots/2c89a47b-9dd5-11ef-938f-6e654a286000/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
+multitasking==0.0.11
+numpy==2.0.2
+pandas==2.2.3
+peewee==3.17.9
+platformdirs==4.3.6
+pymongo==4.11
+python-dateutil==2.9.0.post0
+pytz==2025.1
+requests==2.32.3
+six @ file:///AppleInternal/Library/BuildRoots/2c89a47b-9dd5-11ef-938f-6e654a286000/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl
+soupsieve==2.6
+typing_extensions==4.12.2
+tzdata==2025.1
+urllib3==2.3.0
+webencodings==0.5.1
+yfinance==0.2.52
