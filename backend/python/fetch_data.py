@@ -16,7 +16,7 @@ def get_stock_data(ticker):
         formatted_data = []
         for index, row in data.iterrows():
             formatted_data.append({
-                "Data": index.strftime("%Y-%m-%d"),
+                "Data": index.strftime("%Y-%m-%d %H:%M"),
                 "Apertura": round(row['Open'].item(), 2),
                 "Chiusura": round(row['Close'].item(), 2),
                 "Massimo": round(row['High'].item(), 2),

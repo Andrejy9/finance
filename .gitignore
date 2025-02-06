@@ -18,3 +18,8 @@ pip-delete-this-directory.txt
 
 # Escludi i file di configurazione di VS Code
 .vscode/
+
+
+#Escludo node_modules
+./node_modules
+frontend/node_modules/

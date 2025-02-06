@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafico Dati Finanziari</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 1200px;
+            /* Aumentato da 800px a 1200px */
+            height: 600px;
+            /* Imposta un'altezza più grande */
+            margin: 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Andamento del Titolo</h2>
+    <label for="ticker">Seleziona Ticker:</label>
+    <select id="ticker">
+        <option value="AAPL">Apple (AAPL)</option>
+        <option value="GOOGL">Google (GOOGL)</option>
+        <option value="MSFT">Microsoft (MSFT)</option>
+    </select>
+    <button onclick="fetchAndDrawChart()">Aggiorna Grafico</button>
+
+    <canvas id="stockChart"></canvas>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
