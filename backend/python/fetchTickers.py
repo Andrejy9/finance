@@ -1,4 +1,6 @@
+from database.mongoFunctions import save_tickers
 from yahooquery import Screener
+
 
 def get_available_screeners():
     """ Ottiene la lista degli screener disponibili su Yahoo Finance """
@@ -74,19 +76,17 @@ def extract_ticker_data(data):
   
 
     return {}
+    
 def get_total_tickers():
-    """ Scarica i ticker da tutti gli screener disponibili """
+    """ Scarica i ticker da tutti gli screener disponibili e li salva su MongoDB """
     screeners = get_available_screeners()
     
-    all_tickers = {}
     for screener in screeners:
         print(f"Scaricando dati da screener: {screener}...")
         tickers = get_all_tickers(screener, count=200)
         if tickers:
-            all_tickers[screener] = tickers
-    
-    return all_tickers
-
+            save_tickers(tickers, screener)  # Salva i dati su MongoDB
+            print(f"Salvati {len(tickers)} ticker da {screener} su MongoDB.")
 
 get_total_tickers()
 

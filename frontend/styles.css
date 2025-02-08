@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+canvas {
+    width: 100%;
+    max-width: 1200px;
+    height: 600px;
+    margin: 20px auto;
+}
+
+#savedTickers {
+    margin-top: 20px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+select {
+    padding: 5px;
+    font-size: 16px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    display: flex;
+    justify-content: space-between;
+    background: #f4f4f4;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+ul li button {
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+}

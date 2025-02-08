@@ -4,35 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafico Dati Finanziari</title>
+    <title>Selezione Ticker e Scaricamento Dati</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        canvas {
-            width: 100%;
-            max-width: 1200px;
-            /* Aumentato da 800px a 1200px */
-            height: 600px;
-            /* Imposta un'altezza più grande */
-            margin: 20px auto;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css"> <!-- ✅ Importa il file CSS separato -->
 </head>
 
 <body>
 
-    <h2>Andamento del Titolo</h2>
+    <h2>Selezione e Scaricamento Dati Ticker</h2>
+
+    <label for="category">Seleziona Categoria:</label>
+    <select id="category" onchange="updateTickerList()">
+        <option value="tech">Tecnologia</option>
+        <option value="finance">Finanza</option>
+        <option value="airlines">airlines</option>
+    </select>
+
     <label for="ticker">Seleziona Ticker:</label>
     <select id="ticker">
-        <option value="AAPL">Apple (AAPL)</option>
-        <option value="GOOGL">Google (GOOGL)</option>
-        <option value="MSFT">Microsoft (MSFT)</option>
+        <!-- I ticker verranno aggiornati dinamicamente -->
     </select>
+
+    <button onclick="saveTicker()">Salva Ticker</button>
+
+    <h3>Tickers Salvati:</h3>
+    <ul id="savedTickers"></ul>
+
     <button onclick="fetchAndDrawChart()">Aggiorna Grafico</button>
+
 
     <canvas id="stockChart"></canvas>
 
