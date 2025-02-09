@@ -22,3 +22,18 @@ def save_tickers(tickers, COLLECTION_NAME):
             query = {"symbol": ticker["symbol"]}  # Usa 'symbol' come chiave primaria
             update = {"$set": ticker}
             collection.update_one(query, update, upsert=True)  # Inserisce o aggiorna
+
+def get_last_screener():
+    '''Ottiene l'ultimo screener processato dal DB'''
+    db = client['progress_db']
+    progress = db.screener_progress.find_one({"_id": "last_screener"})
+    return progress["screener"] if progress else None
+
+def update_last_screener(screener_name):
+    '''Aggiorna l'ultimo screener processato nel DB'''
+    db = client['progress_db']
+    db.screener_progress.update_one(
+        {"_id": "last_screener"},
+        {"$set": {"screener": screener_name}},
+        upsert=True
+    )

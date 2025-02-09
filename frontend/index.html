@@ -4,37 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selezione Ticker e Scaricamento Dati</title>
+    <title>Ifrit II</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css"> <!-- ✅ Importa il file CSS separato -->
+    <link rel="stylesheet" href="pages/tickerStyles.css"> <!-- ✅ Importa il file CSS separato -->
 </head>
 
 <body>
 
-    <h2>Selezione e Scaricamento Dati Ticker</h2>
+    <h2>Ifrit II</h2>
+    <div class="saved-tickers-container">
+        <h3>📌 Tickers Salvati</h3>
+        <ul id="savedTickersList" class="saved-tickers-list"></ul>
+    </div>
 
-    <label for="category">Seleziona Categoria:</label>
-    <select id="category" onchange="updateTickerList()">
-        <option value="tech">Tecnologia</option>
-        <option value="finance">Finanza</option>
-        <option value="airlines">airlines</option>
-    </select>
-
-    <input type="text" id="tickerFilter" placeholder="Cerca ticker..." style="margin-bottom: 10px;">
-    <div id="tickerContainer"></div>
-
-
-    <button onclick="saveSelectedTickers()">Salva Ticker</button>
-
-    <h3>Tickers Salvati:</h3>
-    <ul id="savedTickers"></ul>
+  
 
     <button onclick="fetchAndDrawChart()">Aggiorna Grafico</button>
 
-
     <canvas id="stockChart"></canvas>
 
-    <script src="script.js"></script>
+    <a href="pages/tickersManager.html" class="link-button">
+        <i class="fas fa-chart-line"></i> Vai a Tickers Manager
+    </a>
+
+    <script src="script.js"></script>   
+    <script src="./scripts/tickersManager.js"></script>
 
 </body>
 

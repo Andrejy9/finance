@@ -1,0 +1,147 @@
+#tickerFilter {
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.category {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.category-header {
+    padding: 10px;
+    background-color: #050505;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-icon {
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.ticker-list {
+    padding: 5px;
+    background-color: #050505;
+}
+
+.ticker-item {
+    padding: 8px;
+    border-bottom: 1px solid  #050505;
+    display: flex;
+    align-items: center;
+}
+
+.ticker-item:hover {
+    background-color: #131149;
+}
+
+.ticker-checkbox {
+    margin-right: 10px;
+}
+
+.saved-tickers-container {
+
+    width: 43%;
+}
+
+.saved-tickers-list li {
+    background-color: #131149;
+    border: 1px solid #050505;
+    color: white;
+}
+
+.saved-tickers-list li:hover {
+    background-color: #1b1b6f;
+}
+
+.remove-ticker-btn {
+    background-color: #1b1b6f;
+}
+
+.remove-ticker-btn:hover {
+    background-color: #131149;
+}
+
+.expand-btn {
+    background-color: #1b1b6f; /* Stesso colore dei bottoni esistenti */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.expand-btn:hover {
+    background-color: #131149; /* Colore hover coerente con .remove-ticker-btn */
+}
+
+.ticker-details {
+    padding: 10px;
+    background-color: #050505;
+    border-top: 1px solid #1b1b6f;
+    animation: fadeIn 0.3s ease-in;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* ✅ Allinea il testo a sinistra */
+}
+
+.ticker-details p {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 5px 0;
+    padding: 4px;
+    font-size: 0.9em;
+    color: white; /* ✅ Testo principale bianco */
+}
+
+.detail-item {
+    margin: 5px 0;
+    padding: 4px;
+    font-size: 0.9em;
+}
+
+.detail-item strong {
+    color: #333;
+    min-width: 120px;
+    display: inline-block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.hidden {
+    display: none; /* Inizialmente nascosto */
+}
+
+#tickerContainer {
+    background-color: #050505;
+    padding: 10px;
+    border: 1px solid #1b1b6f;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.toggle-btn {
+    background-color: #1b1b6f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-btn:hover {
+    background-color: #131149;
+}

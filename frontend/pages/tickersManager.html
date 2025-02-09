@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticker Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="./tickerStyles.css">
+</head>
+<body>
+
+    <h2>Ticker Select</h2>
+
+    <div class="filters-container">
+        <div class="filter-group">
+            <label for="category">Select Category:</label>
+            <select id="category" onchange="applyFilters()">
+                <option value="all">All Categories</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="tickerFilter">Find ticker:</label>
+            <input type="text" id="tickerFilter" onkeyup="applyFilters()" placeholder="Digita nome o simbolo...">
+        </div>
+    </div>
+
+    <button id="toggleTickerBtn" class="toggle-btn">+</button>
+    <div id="tickerContainer" class="hidden"></div>
+    
+    <button onclick="saveSelectedTickers()">Save Ticker</button>
+
+    <div class="saved-tickers-container">
+        <h3>📌 Saved Tickers </h3>
+        <ul id="savedTickersList" class="saved-tickers-list"></ul>
+    </div>
+
+    <a href="../index.html" class="link-button">🏠 Home</a>
+
+    <script src="../scripts/tickersManager.js"></script>
+</body>
+</html>

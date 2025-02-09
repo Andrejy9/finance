@@ -82,12 +82,18 @@ def get_total_tickers():
     screeners = get_available_screeners()
     
     for screener in screeners:
-        print(f"Scaricando dati da screener: {screener}...")
+        if "cryptocurrencies" in screener.lower():  # ✅ Salta gli screener delle criptovalute
+            print(f"❌ Saltato screener: {screener} (contiene 'cryptocurrencies')")
+            continue
+        
+        print(f"📥 Scaricando dati da screener: {screener}...")
         tickers = get_all_tickers(screener, count=200)
+        
         if tickers:
-            save_tickers(tickers, screener)  # Salva i dati su MongoDB
-            print(f"Salvati {len(tickers)} ticker da {screener} su MongoDB.")
+            save_tickers(tickers, screener)  # ✅ Salva i dati su MongoDB
+            print(f"✅ Salvati {len(tickers)} ticker da {screener} su MongoDB.")
 
+            
 get_total_tickers()
 
 
