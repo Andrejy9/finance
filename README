@@ -1,4 +1,4 @@
-# Ticker Management System
+# Personal Finance
 
 ## Overview
 This project is a **Python and Node.js, MongoDB-based finance management system** designed to monitor a customizable number of tickers. Future implementations will include historical data downloads, web scraping for real-time market insights, and fundamental analysis. These enhancements, combined with AI-driven analytics, will support medium-term investment decision-making.
@@ -33,9 +33,6 @@ The system follows a **modular architecture**, making it extensible for future A
 - **Automated Trading Logic**:
   - Utilize **indicators like ATR** for risk management.
   - Develop a **smart bot** capable of making trading decisions.
-- **Blockchain Integration**:
-  - Track **on-chain data** for crypto trading strategies.
-  - Ensure **secure and transparent trade execution**.
 
 ## Installation
 ### Prerequisites
@@ -46,7 +43,6 @@ The system follows a **modular architecture**, making it extensible for future A
 1. Clone the repository:
    ```sh
    git clone https://github.com/your-repo/ticker-management.git
-   cd ticker-management
    ```
 2. Install dependencies:
    ```sh
