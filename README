@@ -1,0 +1,74 @@
+# Ticker Management System
+
+## Overview
+This project is a **Python and Node.js, MongoDB-based finance management system** designed to monitor a customizable number of tickers. Future implementations will include historical data downloads, web scraping for real-time market insights, and fundamental analysis. These enhancements, combined with AI-driven analytics, will support medium-term investment decision-making.
+
+## Features
+- **Multi-database support**: Uses multiple MongoDB databases (`finance`, `tickers`) to manage ticker data.
+- **Duplicate prevention**: Ensures that the same ticker is not saved multiple times.
+- **REST API endpoints**: Provides endpoints for saving and retrieving ticker information.
+- **Scalability**: Designed to support additional features like **AI-driven trading insights** and **automated risk management**.
+
+## Architecture
+The system follows a **modular architecture**, making it extensible for future AI and trading logic enhancements.
+
+### Current Architecture
+1. **Frontend (under development)**:
+   - Will provide a UI for interacting with the finance system.
+
+
+2. **Backend (Node.js, Express, Python)**:
+   - Handles API requests for saving and retrieving tickers.
+   - Prevents duplicate entries before insertion.
+   - Manages database connections dynamically.
+
+3. **Database (MongoDB)**:
+   - `tickers` database: Stores market data for various tickers.
+   - `finance` database: Manages user-specific saved tickers.
+
+### Planned Enhancements
+- **AI & Machine Learning Integration**:
+  - Implement **neural networks** and **predictive models** for trading insights.
+  - Analyze **holder distribution patterns** and **price movement trends**.
+- **Automated Trading Logic**:
+  - Utilize **indicators like ATR** for risk management.
+  - Develop a **smart bot** capable of making trading decisions.
+- **Blockchain Integration**:
+  - Track **on-chain data** for crypto trading strategies.
+  - Ensure **secure and transparent trade execution**.
+
+## Installation
+### Prerequisites
+- Node.js (>=14.x)
+- MongoDB
+
+### Setup
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/ticker-management.git
+   cd ticker-management
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Configure environment variables (`.env` file):
+   ```env
+   MONGO_URI=mongodb://localhost:27017
+   ```
+4. Run the server:
+   ```sh
+   npm start
+   ```
+
+
+## Contributors
+- **Andrea** (Project Lead, AI Integration & Trading Strategies)
+
+## Future Roadmap
+- ✅ Implement Ticker Storage and API
+- ⏳ Implement historical price data download from web
+- ⏳ Implement other scraping logics (news, recent tweets)
+- ⏳ AI Model for Predicting Market Trends
+- ⏳ Automated Trading Bot
+
