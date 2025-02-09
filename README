@@ -42,7 +42,7 @@ The system follows a **modular architecture**, making it extensible for future A
 ### Setup
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/ticker-management.git
+   git clone https://github.com/Andrejy9/finance
    ```
 2. Install dependencies:
    ```sh
