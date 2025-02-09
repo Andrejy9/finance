@@ -49,10 +49,15 @@ exports.saveTickers = async (req, res) => {
       return res.status(404).json({ message: "Nessun dettaglio trovato" });
     }
 
-    const documents = tickerDetails.map(ticker => ({
+    let documents = tickerDetails.map(ticker => ({
       ...ticker,
       savedAt: new Date()
     }));
+
+    // Rimuove eventuali duplicati prima di inserire i nuovi ticker
+    documents = documents.filter(
+      (ticker, index, self) => index === self.findIndex(t => t.symbol === ticker.symbol)
+    );
 
     // Controlla se i ticker esistono già nella collezione "savedtickers"
     const existingTickers = await savedTickersCollection.find({

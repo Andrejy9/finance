@@ -232,7 +232,18 @@ async function renderSavedTickersList() {
         for (const key in ticker) {
             if (key !== "symbol" && key !== "Company Name" && key !== "_id") {
                 const detailItem = document.createElement("p");
-                detailItem.textContent = `${key}: ${ticker[key]}`;
+        
+                const keySpan = document.createElement("span");
+                keySpan.textContent = `${key}: `;
+                keySpan.classList.add("detail-key");
+        
+                const valueSpan = document.createElement("span");
+                valueSpan.textContent = ticker[key];
+                valueSpan.classList.add("detail-value");
+        
+                detailItem.appendChild(keySpan);
+                detailItem.appendChild(valueSpan);
+        
                 detailsDiv.appendChild(detailItem);
             }
         }

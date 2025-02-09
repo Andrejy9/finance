@@ -84,7 +84,7 @@
 
 .ticker-details {
     padding: 10px;
-    background-color: #050505;
+    background-color: #05051f;
     border-top: 1px solid #1b1b6f;
     animation: fadeIn 0.3s ease-in;
     display: flex;
@@ -144,4 +144,12 @@
 
 .toggle-btn:hover {
     background-color: #131149;
+}
+
+.detail-key {
+    font-weight: bold;
+}
+
+.detail-value {
+    color: #2f6a23; /* Sostituisci con il colore che preferisci */
 }
