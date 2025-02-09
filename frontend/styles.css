@@ -46,3 +46,50 @@ ul li button {
     border: none;
     cursor: pointer;
 }
+
+/* Aggiungi questo CSS */
+#tickerFilter {
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.category {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.category-header {
+    padding: 10px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-icon {
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.ticker-list {
+    padding: 5px;
+    background-color: white;
+}
+
+.ticker-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.ticker-item:hover {
+    background-color: #f9f9f9;
+}
+
+.ticker-checkbox {
+    margin-right: 10px;
+}

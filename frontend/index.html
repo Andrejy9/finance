@@ -20,12 +20,11 @@
         <option value="airlines">airlines</option>
     </select>
 
-    <label for="ticker">Seleziona Ticker:</label>
-    <select id="ticker">
-        <!-- I ticker verranno aggiornati dinamicamente -->
-    </select>
+    <input type="text" id="tickerFilter" placeholder="Cerca ticker..." style="margin-bottom: 10px;">
+    <div id="tickerContainer"></div>
 
-    <button onclick="saveTicker()">Salva Ticker</button>
+
+    <button onclick="saveSelectedTickers()">Salva Ticker</button>
 
     <h3>Tickers Salvati:</h3>
     <ul id="savedTickers"></ul>

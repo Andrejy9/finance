@@ -48,30 +48,28 @@ app.get('/api/financial-data/:ticker', async (req, res) => {
   }
 });
 
-// ✅ **Endpoint per recuperare tutti i ticker**
+// ✅ **Endpoint per recuperare tutti i ticker classificati per categoria**
 app.get("/api/tickers", async (req, res) => {
   try {
     const tickersDb = mongoose.connection.useDb("tickers"); // 🔹 Accede al database "tickers"
     const collectionsCursor = await tickersDb.listCollections();
     const collectionNames = collectionsCursor.map(collection => collection.name);
-    console.log(collectionNames);
 
-    let allTickers = [];
+    let categorizedTickers = {};
 
     // 🔹 Per ogni collezione, recupera i documenti
-    for (let collectionInfo of collectionNames) {
-      const collectionName = collectionInfo;
+    for (let collectionName of collectionNames) {
       const collection = tickersDb.collection(collectionName);
       const tickers = await collection.find({}).toArray();
-      
-      // Aggiunge i documenti alla lista globale
-      allTickers = allTickers.concat(tickers);
+
+      // 🔹 Ordina i ticker per simbolo all'interno di ogni categoria
+      tickers.sort((a, b) => (a.symbol > b.symbol ? 1 : -1));
+
+      // 🔹 Aggiunge la categoria al risultato
+      categorizedTickers[collectionName] = tickers;
     }
 
-    // 🔹 Ordina la lista per simbolo del ticker
-    allTickers.sort((a, b) => (a.symbol > b.symbol ? 1 : -1));
-
-    res.json(allTickers);
+    res.json(categorizedTickers);
 
   } catch (err) {
     console.error("Errore nel recupero dei ticker:", err);
@@ -95,6 +93,54 @@ app.get("/api/ticker/:symbol", async (req, res) => {
   } catch (err) {
     console.error("Errore nel recupero dei dati:", err);
     res.status(500).json({ message: "Errore interno del server" });
+  }
+});
+
+app.post("/api/save-tickers", async (req, res) => {
+  try {
+      const financeDb = mongoose.connection.useDb("finance"); // 🔹 Usa il database "finance"
+      const savedTickersCollection = financeDb.collection("savedtickers"); // 🔹 Collection dedicata ai ticker salvati
+
+      const { tickers } = req.body;
+
+      if (!tickers || tickers.length === 0) {
+          return res.status(400).json({ message: "Nessun ticker selezionato" });
+      }
+
+      // Converte i simboli in uppercase
+      const tickerSymbols = tickers.map(t => t.toUpperCase());
+
+      // 🔹 Ottieni tutte le collezioni dal database "tickers"
+      const tickersDb = mongoose.connection.useDb("tickers");
+      const collectionsCursor = await tickersDb.listCollections();
+      const collectionNames = collectionsCursor.map(collection => collection.name);
+
+      let tickerDetails = [];
+
+      // 🔹 Cerca i ticker in tutte le collezioni
+      for (const collectionName of collectionNames) {
+          const collection = tickersDb.collection(collectionName);
+          const results = await collection.find({ symbol: { $in: tickerSymbols } }).toArray();
+          tickerDetails = tickerDetails.concat(results);
+      }
+
+      if (tickerDetails.length === 0) {
+          return res.status(404).json({ message: "Nessun dettaglio trovato per i ticker selezionati" });
+      }
+
+      // 🔹 Inserisce i dettagli nella collection `savedtickers`
+      const documents = tickerDetails.map(ticker => ({
+          ...ticker,
+          savedAt: new Date() // Aggiunge il timestamp di salvataggio
+      }));
+
+      await savedTickersCollection.insertMany(documents);
+
+      res.json({ message: "Ticker salvati con successo", tickers: documents });
+
+  } catch (error) {
+      console.error("Errore nel salvataggio dei ticker:", error);
+      res.status(500).json({ message: "Errore interno del server" });
   }
 });
 
