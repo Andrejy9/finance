@@ -5,32 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ifrit II</title>
+
+    <!-- Dipendenze CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="pages/tickerStyles.css">
+
+    <!-- Dipendenze JavaScript (ordine corretto) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="styles.css"> <!-- ✅ Importa il file CSS separato -->
-    <link rel="stylesheet" href="pages/tickerStyles.css"> <!-- ✅ Importa il file CSS separato -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair"></script> <!-- Plugin crosshair -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@1.0.0"></script>
+
+    <!-- Registrazione plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial">
+        // Registra i componenti necessari
+        Chart.register(
+            Chart.Financial.CandlestickController,
+            Chart.Financial.CandlestickElement,
+            Chart.Financial.FinancialController,
+            Chart.Financial.FinancialElement,
+            Zoom
+        );
+    </script>
 </head>
 
 <body>
-
     <h2>Ifrit II</h2>
+
     <div class="saved-tickers-container">
         <h3>📌 Tickers Salvati</h3>
         <ul id="savedTickersList" class="saved-tickers-list"></ul>
     </div>
 
+    <button onclick="fetchAndDrawChart()">📊</button>
+
+    <div class="chart-controls">
+        <button onclick="resetZoom()" class="control-btn">🗘 Reset Zoom</button>
+    </div>
+    <div class="chart-container">
+        
+        <canvas id="stockChart"></canvas>
+    </div>
   
 
-    <button onclick="fetchAndDrawChart()">Aggiorna Grafico</button>
-
-    <canvas id="stockChart"></canvas>
+   
 
     <a href="pages/tickersManager.html" class="link-button">
         <i class="fas fa-chart-line"></i> Vai a Tickers Manager
     </a>
 
-    <script src="script.js"></script>   
+    <!-- Scripts applicazione (ordine corretto) -->
+    <script src="script.js"></script>
     <script src="./scripts/tickersManager.js"></script>
-
 </body>
 
 </html>

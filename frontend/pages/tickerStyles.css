@@ -153,3 +153,22 @@
 .detail-value {
     color: #2f6a23; /* Sostituisci con il colore che preferisci */
 }
+
+.ticker-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ticker-text {
+    flex-grow: 1;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}

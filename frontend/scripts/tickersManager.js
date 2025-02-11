@@ -182,7 +182,9 @@ async function populateSavedTickers() {
 }
 
 // Funzione per visualizzare i ticker salvati
-// Funzione per visualizzare i ticker salvati con possibilità di espandere le informazioni
+// Aggiungi questa variabile globale
+let selectedTickers = new Set();
+
 async function renderSavedTickersList() {
     const savedTickersList = document.getElementById("savedTickersList");
     const savedTickers = await fetchSavedTickers();
@@ -195,9 +197,19 @@ async function renderSavedTickersList() {
         // Contenitore principale
         const tickerContainer = document.createElement("div");
         tickerContainer.className = "ticker-container";
+        if (selectedTickers.has(ticker.symbol)) {
+            tickerContainer.classList.add("selected");
+        }
+
+        // Checkbox di selezione
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectedTickers.has(ticker.symbol);
+        checkbox.onchange = () => toggleTickerSelection(ticker.symbol, tickerContainer);
 
         // Testo del ticker
         const tickerText = document.createElement("span");
+        tickerText.className = "ticker-text";
         tickerText.textContent = ticker.symbol;
         if (ticker["Company Name"]) {
             tickerText.textContent += ` - ${ticker["Company Name"]}`;
@@ -207,48 +219,43 @@ async function renderSavedTickersList() {
         const expandBtn = document.createElement("button");
         expandBtn.className = "expand-ticker-btn";
         expandBtn.textContent = "+";
-        expandBtn.onclick = () => {
-            if (detailsDiv.style.display === "none") {
-                detailsDiv.style.display = "block";
-                expandBtn.textContent = "−"; // Cambia in "−" per contrarre
-            } else {
-                detailsDiv.style.display = "none";
-                expandBtn.textContent = "+"; // Torna a "+"
-            }
+        expandBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleDetails(detailsDiv, expandBtn);
         };
 
         // Bottone rimozione "×"
         const removeBtn = document.createElement("button");
         removeBtn.className = "remove-ticker-btn";
         removeBtn.textContent = "×";
-        removeBtn.onclick = () => removeSavedTicker(ticker.symbol);
+        removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            removeSavedTicker(ticker.symbol);
+        };
 
         // Contenitore dettagli nascosto
         const detailsDiv = document.createElement("div");
         detailsDiv.className = "ticker-details";
-        detailsDiv.style.display = "none"; // Inizialmente nascosto
+        detailsDiv.style.display = "none";
 
-        // Aggiunge tutte le proprietà del ticker come dettagli
+        // Popola i dettagli (come prima)
         for (const key in ticker) {
             if (key !== "symbol" && key !== "Company Name" && key !== "_id") {
                 const detailItem = document.createElement("p");
-        
                 const keySpan = document.createElement("span");
                 keySpan.textContent = `${key}: `;
                 keySpan.classList.add("detail-key");
-        
                 const valueSpan = document.createElement("span");
                 valueSpan.textContent = ticker[key];
                 valueSpan.classList.add("detail-value");
-        
                 detailItem.appendChild(keySpan);
                 detailItem.appendChild(valueSpan);
-        
                 detailsDiv.appendChild(detailItem);
             }
         }
 
         // Struttura della lista
+        tickerContainer.appendChild(checkbox);
         tickerContainer.appendChild(expandBtn);
         tickerContainer.appendChild(tickerText);
         tickerContainer.appendChild(removeBtn);
@@ -256,6 +263,26 @@ async function renderSavedTickersList() {
         listItem.appendChild(detailsDiv);
         savedTickersList.appendChild(listItem);
     });
+}
+
+function toggleTickerSelection(symbol, container) {
+    if (selectedTickers.has(symbol)) {
+        selectedTickers.delete(symbol);
+        container.classList.remove("selected");
+    } else {
+        selectedTickers.add(symbol);
+        container.classList.add("selected");
+    }
+}
+
+function toggleDetails(detailsDiv, btn) {
+    if (detailsDiv.style.display === "none") {
+        detailsDiv.style.display = "block";
+        btn.textContent = "−";
+    } else {
+        detailsDiv.style.display = "none";
+        btn.textContent = "+";
+    }
 }
 
 // Funzione per rimuovere un ticker
@@ -375,14 +402,17 @@ function createCategorySection(category, tickers) {
     tickerContainer.appendChild(categoryDiv);
 }
 
-document.getElementById("toggleTickerBtn").addEventListener("click", function () {
-    const tickerContainer = document.getElementById("tickerContainer");
-    if (tickerContainer.classList.contains("hidden")) {
-        tickerContainer.classList.remove("hidden");
-        this.textContent = "−"; // Cambia in "-" quando è visibile
-    } else {
-        tickerContainer.classList.add("hidden");
-        this.textContent = "+"; // Torna a "+"
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.location.pathname.endsWith("tickersManager.html")) {
+        const toggleBtn = document.getElementById("toggleTickerBtn");
+        const tickerContainer = document.getElementById("tickerContainer");
+
+        if (toggleBtn && tickerContainer) {
+            toggleBtn.addEventListener("click", function () {
+                tickerContainer.classList.toggle("hidden");
+                this.textContent = tickerContainer.classList.contains("hidden") ? "+" : "−";
+            });
+        }
     }
 });
 
