@@ -205,8 +205,11 @@ async function renderSavedTickersList() {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = selectedTickers.has(ticker.symbol);
-        checkbox.onchange = () => toggleTickerSelection(ticker.symbol, tickerContainer);
-
+        checkbox.onchange = () => {
+            toggleTickerSelection(ticker.symbol, tickerContainer);
+            handleCheckboxClick(ticker.symbol); // ✅ Popola l'input se siamo su index.html
+        };
+        
         // Testo del ticker
         const tickerText = document.createElement("span");
         tickerText.className = "ticker-text";
@@ -425,3 +428,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         await renderSavedTickersList(); // Aggiungi questa linea
     }
 });
+
+function handleCheckboxClick(tickerSymbol) {
+    // Controlla se siamo in index.html
+    if (window.location.pathname.endsWith("index.html")) {
+        const tickerInput = document.getElementById("tickerInput");
+        if (tickerInput) {
+            tickerInput.value = tickerSymbol; // Popola l'input con il ticker selezionato
+        }
+    }
+}

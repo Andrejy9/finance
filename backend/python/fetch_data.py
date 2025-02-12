@@ -4,10 +4,12 @@ import sys
 import json
 from datetime import datetime
 
-def get_stock_data(ticker):
+def get_stock_data(ticker, timeframe):
     try:
+        period = determine_period(timeframe)
+
         # Scarica i dati con progressivo
-        data = yf.download(ticker, period="7d", interval="5m",  progress=False)
+        data = yf.download(ticker, period=period, interval=timeframe,  progress=False)
 
         if data.empty:
             return {"error": "Nessun dato trovato per questo ticker"}
@@ -33,6 +35,21 @@ def get_stock_data(ticker):
 
     except Exception as e:
         return {"success": False, "error": str(e)}
+    
+
+def determine_period(timeframe):
+    timeframe_to_period = {
+        "1m": "7d",    # 7 giorni per timeframe da 1 minuto
+        "5m": "14d",   # 2 settimane per timeframe da 5 minuti
+        "10m": "21d",  # 3 settimane per timeframe da 10 minuti
+        "15m": "30d",  # 1 mese per timeframe da 15 minuti
+        "1h": "60d",   # 2 mesi per timeframe da 1 ora
+        "1d": "2y",    # 2 anni per timeframe da 1 giorno
+        "1wk": "5y",   # 5 anni per timeframe settimanale
+        "1mo": "24y",  # 24 anni per timeframe mensile
+    }
+
+    return timeframe_to_period.get(timeframe, "6mo")  # Default a 6 mesi se non specificato
 
 if __name__ == "__main__":
     # Default a AAPL se nessun ticker è specificato
