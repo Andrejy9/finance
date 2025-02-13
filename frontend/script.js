@@ -1,35 +1,5 @@
 const apiUrl = "http://localhost:5050/api/financial-data/";
 
-function createChart(labels, closePrices) {
-    const ctx = document.getElementById("stockChart").getContext("2d");
-
-    // Distruggere il grafico esistente se già presente
-    if (window.myChart) {
-        window.myChart.destroy();
-    }
-
-    window.myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Prezzo di Chiusura",
-                data: closePrices,
-                borderColor: "blue",
-                backgroundColor: "rgba(0, 0, 255, 0.2)",
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { display: true, title: { display: true, text: "Data e Ora" } },
-                y: { display: true, title: { display: true, text: "Prezzo (€)" } }
-            }
-        }
-    });
-}
-
 
 function renderLineChart(data, ticker) {
     const ctx = document.getElementById("stockChart").getContext("2d");
@@ -239,7 +209,6 @@ function getChartOptions(type) {
     return { ...commonOptions, ...specificOptions[type] };
 }
 
-
 // ⚡️ Aggiorna la lista dei ticker salvati
 function updateSavedTickersUI() {
     const savedList = document.getElementById("savedTickers");
@@ -276,12 +245,6 @@ function resetZoom() {
     }
 }
 
-function togglePan(enabled) {
-    if (window.myChart) {
-        window.myChart.options.plugins.zoom.pan.enabled = enabled;
-        window.myChart.update();
-    }
-}
 
 // Aggiorna l'evento di caricamento della pagina
 document.addEventListener('DOMContentLoaded', async () => {
@@ -303,96 +266,6 @@ document.addEventListener("keyup", (event) => {
     if (event.key === "Control") {
         zoomEnabled = false;
     }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    const tickerInput = document.getElementById("tickerInput");
-    const suggestionsList = document.getElementById("suggestionsList");
-    let allTickers = [];
-
-    // Stile iniziale per la lista dei suggerimenti
-    suggestionsList.style.position = 'absolute';
-    suggestionsList.style.width = tickerInput.offsetWidth + 'px';
-    suggestionsList.style.display = 'none';
-
-    async function fetchTickers() {
-        try {
-            const response = await fetch(`http://localhost:5050/api/tickers`);
-            const tickers = await response.json();
-
-            allTickers = Object.entries(tickers).flatMap(([category, tickers]) => {
-                return tickers.map(ticker => ({
-                    ...ticker,
-                    category: category
-                }));
-            });
-
-        } catch (error) {
-            console.error("Errore nel recupero dei ticker:", error);
-        }
-    }
-
-    function filterTickers(query) {
-        const filtered = allTickers.filter(ticker =>
-            ticker.symbol.toLowerCase().startsWith(query.toLowerCase())
-        );
-
-        // Rimuove duplicati mantenendo solo il primo occorrenza
-        const uniqueSymbols = new Set();
-        return filtered.filter(ticker => {
-            const isNew = !uniqueSymbols.has(ticker.symbol);
-            uniqueSymbols.add(ticker.symbol);
-            return isNew;
-        });
-    }
-
-    function showSuggestions(filteredTickers) {
-        suggestionsList.innerHTML = "";
-
-        // Posiziona la lista sotto l'input
-        const inputRect = tickerInput.getBoundingClientRect();
-        suggestionsList.style.top = inputRect.bottom + window.scrollY + 'px';
-        suggestionsList.style.left = inputRect.left + window.scrollX + 'px';
-        suggestionsList.style.display = 'block';
-
-        filteredTickers.slice(0, 5).forEach(ticker => {
-            const listItem = document.createElement("li");
-            listItem.textContent = ticker.symbol; // Mostra solo lo symbol
-            listItem.style.cursor = 'pointer';
-            listItem.style.padding = '5px';
-
-            listItem.addEventListener("click", () => {
-                tickerInput.value = ticker.symbol;
-                suggestionsList.style.display = 'none'; // Nasconde la lista al click
-            });
-
-            listItem.onmouseover = () => listItem.style.backgroundColor = '#f0f0f0';
-            listItem.onmouseout = () => listItem.style.backgroundColor = 'transparent';
-
-            suggestionsList.appendChild(listItem);
-        });
-    }
-
-    tickerInput.addEventListener("input", () => {
-        const query = tickerInput.value.trim().toUpperCase();
-        if (query.length > 0) {
-            const filteredTickers = filterTickers(query);
-            filteredTickers.length > 0
-                ? showSuggestions(filteredTickers)
-                : suggestionsList.style.display = 'none';
-        } else {
-            suggestionsList.style.display = 'none';
-        }
-    });
-
-    // Chiude la lista quando si clicca fuori
-    document.addEventListener("click", (e) => {
-        if (!tickerInput.contains(e.target)) {
-            suggestionsList.style.display = 'none';
-        }
-    });
-
-    fetchTickers();
 });
 
 

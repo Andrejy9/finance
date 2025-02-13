@@ -12,7 +12,7 @@ async function updateTickerList() {
         tickerContainer.innerHTML = '';
 
         // Crea elemento filtro se non esiste
-        const filterInput = document.getElementById("tickerFilter");
+        const filterInput = document.getElementById("tickerInput");
         filterInput.onkeyup = () => filterTickers(data);
 
         // Itera sulle categorie
@@ -70,7 +70,7 @@ async function updateTickerList() {
 
 // Funzione filtro
 function filterTickers(data) {
-    const filterText = document.getElementById("tickerFilter").value.toLowerCase();
+    const filterText = document.getElementById("tickerInput").value.toLowerCase();
     
     document.querySelectorAll(".category").forEach(categoryDiv => {
         const categoryName = categoryDiv.querySelector(".category-header").textContent.toLowerCase();
@@ -91,6 +91,7 @@ function filterTickers(data) {
 // ⚡️ Recupera i ticker selezionati da #tickerContainer e li salva
 function saveSelectedTickers() {
     const tickerContainer = document.getElementById("tickerContainer");
+    const tickerInput = document.getElementById("tickerInput");
 
     if (!tickerContainer) {
         console.error("Elemento tickerContainer non trovato!");
@@ -101,23 +102,27 @@ function saveSelectedTickers() {
     const selectedCheckboxes = tickerContainer.querySelectorAll("input[type='checkbox']:checked");
 
     // Estrae i valori dei ticker selezionati, rimuovendo eventuali duplicati
-    const selectedTickers = Array.from(new Set(Array.from(selectedCheckboxes).map(checkbox => {
-        // Ottieni il valore del ticker dal testo dell'elemento
+    let selectedTickers = Array.from(new Set(Array.from(selectedCheckboxes).map(checkbox => {
         const tickerText = checkbox.closest(".ticker-item").textContent.trim();
         const tickerSymbolMatch = tickerText.match(/\(([A-Z0-9.-]+)\)/);
         return tickerSymbolMatch ? tickerSymbolMatch[1] : null;
-    }))).filter(ticker => ticker !== null); // Filtra eventuali valori null
+    }))).filter(ticker => ticker !== null);
 
-
-    // Verifica se ci sono ticker selezionati
+    // Se non ci sono ticker selezionati, usa il valore di tickerInput
     if (selectedTickers.length === 0) {
-        alert("Nessun ticker selezionato!");
-        return;
+        const filterValue = tickerInput.value.trim();
+        if (filterValue) {
+            selectedTickers = [filterValue];
+        } else {
+            alert("Nessun ticker selezionato o inserito!");
+            return;
+        }
     }
 
     console.log("Tickers selezionati:", selectedTickers);
     sendSavedTickersToBackend(selectedTickers);
 }
+
 
 // Funzione di esempio per inviare i ticker al backend
 async function sendSavedTickersToBackend(tickers) {
@@ -341,7 +346,7 @@ async function updateTickerList() {
 }
 
 function applyFilters() {
-    const filterText = document.getElementById("tickerFilter").value.toLowerCase();
+    const filterText = document.getElementById("tickerInput").value.toLowerCase();
     const selectedCategory = document.getElementById("category").value;
     
     const tickerContainer = document.getElementById("tickerContainer");
@@ -438,3 +443,95 @@ function handleCheckboxClick(tickerSymbol) {
         }
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const tickerInput = document.getElementById("tickerInput");
+    const suggestionsList = document.getElementById("suggestionsList");
+    let allTickers = [];
+
+    // Stile iniziale per la lista dei suggerimenti
+    suggestionsList.style.position = 'absolute';
+    suggestionsList.style.width = tickerInput.offsetWidth + 'px';
+    suggestionsList.style.display = 'none';
+
+    async function fetchTickers() {
+        try {
+            const response = await fetch(`http://localhost:5050/api/tickers`);
+            const tickers = await response.json();
+
+            allTickers = Object.entries(tickers).flatMap(([category, tickers]) => {
+                return tickers.map(ticker => ({
+                    ...ticker,
+                    category: category
+                }));
+            });
+
+        } catch (error) {
+            console.error("Errore nel recupero dei ticker:", error);
+        }
+    }
+
+    function filterTickers(query) {
+        const filtered = allTickers.filter(ticker =>
+            ticker.symbol.toLowerCase().startsWith(query.toLowerCase())
+        );
+
+        // Rimuove duplicati mantenendo solo il primo occorrenza
+        const uniqueSymbols = new Set();
+        return filtered.filter(ticker => {
+            const isNew = !uniqueSymbols.has(ticker.symbol);
+            uniqueSymbols.add(ticker.symbol);
+            return isNew;
+        });
+    }
+
+    function showSuggestions(filteredTickers) {
+        suggestionsList.innerHTML = "";
+    
+        // Posiziona la lista sotto l'input
+        const inputRect = tickerInput.getBoundingClientRect();
+        suggestionsList.style.top = inputRect.bottom + window.scrollY + 'px';
+        suggestionsList.style.left = inputRect.left + window.scrollX + 'px';
+        suggestionsList.style.width = inputRect.width + 'px'; // Larghezza uguale all'input
+        suggestionsList.style.display = 'block';
+    
+        filteredTickers.slice(0, 20).forEach(ticker => {
+            const listItem = document.createElement("li");
+            listItem.textContent = ticker.symbol;
+            listItem.style.cursor = 'pointer';
+            listItem.style.padding = '8px 12px';
+            listItem.style.transition = 'background-color 0.2s';
+    
+            listItem.addEventListener("click", () => {
+                tickerInput.value = ticker.symbol;
+                suggestionsList.style.display = 'none';
+            });
+    
+            listItem.onmouseover = () => listItem.style.backgroundColor = '#1b1b6f';
+            listItem.onmouseout = () => listItem.style.backgroundColor = 'transparent';
+    
+            suggestionsList.appendChild(listItem);
+        });
+    }
+
+    tickerInput.addEventListener("input", () => {
+        const query = tickerInput.value.trim().toUpperCase();
+        if (query.length > 0) {
+            const filteredTickers = filterTickers(query);
+            filteredTickers.length > 0
+                ? showSuggestions(filteredTickers)
+                : suggestionsList.style.display = 'none';
+        } else {
+            suggestionsList.style.display = 'none';
+        }
+    });
+
+    // Chiude la lista quando si clicca fuori
+    document.addEventListener("click", (e) => {
+        if (!tickerInput.contains(e.target)) {
+            suggestionsList.style.display = 'none';
+        }
+    });
+
+    fetchTickers();
+});
