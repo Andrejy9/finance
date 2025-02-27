@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
 
 
@@ -21,6 +21,8 @@ exports.fetchAndSaveStockData = async (req, res) => {
     let outputBuffer = '';
     let errorBuffer = '';
     let timeoutId;
+    
+    //exec('which python3', (err, stdout) => console.log("Python path:", stdout.trim()));
 
     const cleanup = () => {
         pythonProcess.kill();
@@ -40,6 +42,7 @@ exports.fetchAndSaveStockData = async (req, res) => {
     });
 
     pythonProcess.stderr.on('data', (data) => {
+        console.error("Errore Python:", data.toString());
         errorBuffer += data.toString();
     });
 

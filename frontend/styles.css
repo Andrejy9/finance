@@ -33,21 +33,24 @@ button:hover {
     max-width: 400px;
 }
 
-
-
 .link-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     display: inline-flex;
     align-items: center;
+    gap: 5px; /* Spazio tra icona ed emoji */
     padding: 10px 15px;
-    background: #5656e6;
-    color: #000;
+    background-color: #007bff; /* Blu principale */
+    color: white;
     text-decoration: none;
     border-radius: 5px;
-    margin-top: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Effetto hover fluido */
 }
 
 .link-button:hover {
-    background: rgb(18, 2, 85);
+    background-color: #0056b3; /* Blu più scuro all'hover */
 }
 
 .link-button i {
@@ -154,3 +157,5 @@ ul li button {
 #suggestionsList li:last-child {
     border-bottom: none;
 }
+
+

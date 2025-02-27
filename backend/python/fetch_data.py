@@ -53,9 +53,9 @@ def determine_period(timeframe):
 
 if __name__ == "__main__":
     # Default a AAPL se nessun ticker è specificato
-    ticker = sys.argv[1] if len(sys.argv) > 1 else "SOXX"
+    ticker = sys.argv[1] if len(sys.argv) > 1 else "NVDA"
     
-    result = get_stock_data(ticker)
+    result = get_stock_data(ticker, "1h")
     
     # Stampa formattata per debug
     print("\n" + "="*50)

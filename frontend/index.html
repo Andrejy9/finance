@@ -25,16 +25,20 @@
             Chart.Financial.CandlestickElement,
             Chart.Financial.FinancialController,
             Chart.Financial.FinancialElement,
-            Zoom
+            Zoom,
+            ChartCrosshairPlugin
         );
     </script>
 </head>
 
 <body>
     <h2>Ifrit II</h2>
+    <a href="pages/tickersManager.html" class="link-button" title="Go to Tickers Manager">
+        <i class="fas fa-chart-line"></i> 📈 Tickers Manager
+    </a>
 
     <div class="saved-tickers-container">
-        <h3>📌 Tickers Salvati</h3>
+        <h3>📌 Saved Tickers</h3>
         <ul id="savedTickersList" class="saved-tickers-list"></ul>
     </div>
 
@@ -45,7 +49,6 @@
     <div class="chart-controls">
         <button onclick="resetZoom()" class="control-btn">🔍Reset Zoom</button>
          <!-- Selettore per il timeframe -->
-    <label for="timeframe"> Timeframe:</label>
     <select id="timeframe">
         <option value="1m">1m</option>
         <option value="5m">5m</option>
@@ -61,13 +64,10 @@
         <canvas id="stockChart"></canvas>
     </div>
 
-    <a href="pages/tickersManager.html" class="link-button">
-        <i class="fas fa-chart-line"></i> Vai a Tickers Manager
-    </a>
-
     <!-- Scripts applicazione (ordine corretto) -->
     <script src="script.js"></script>
     <script src="./scripts/tickersManager.js"></script>
+    <script src="./scripts/graphManager.js"></script>
 </body>
 
 </html>
