@@ -158,4 +158,51 @@ ul li button {
     border-bottom: none;
 }
 
+.toggle-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.toggle-button.active {
+    background-color: #dbba17; /* Verde quando attivo */
+    transform: scale(1.1);
+}
+
+.toggle-button:hover {
+    background-color: #0056b3;
+}
+
+
+.chartjs-toolbar {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 100;
+}
+
+.control-btn {
+    margin: 5px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.chartjs-annotation-label {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ff0000;
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #000 !important;
+    font-family: Arial, sans-serif;
+}
+
+
 

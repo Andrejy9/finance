@@ -1,3 +1,13 @@
+// 🔹 Variabili globali per la selezione
+let calcMode = false;
+let selectedYValues = [];
+let selectionLine = null; // Per salvare la linea visiva
+// Aggiungi queste variabili globali
+let selectionAnnotations = [];
+// Array per memorizzare i segmenti da disegnare
+let drawnSegments = [];
+
+
 async function fetchAndDrawTickerInput() {
     try {
         var inputElement = document.getElementById('tickerInput');
@@ -37,6 +47,12 @@ async function fetchAndDrawTickerInput() {
         alert("Si è verificato un errore durante l'elaborazione dei dati");
     }
 }
+
+document.getElementById('calcGrowthButton').addEventListener('click', function () {
+    this.classList.toggle('active'); // Aggiunge/rimuove la classe 'active'
+    console.log("toggle button");
+    calcMode = !calcMode;
+});
 
 function renderLineChart(data, ticker) {
     const ctx = document.getElementById("stockChart").getContext("2d");
@@ -223,6 +239,7 @@ function renderLineChart(data, ticker) {
                         },
                         mode: 'x',
 
+
                         onZoom: () => {
                             // Aggiorna dimensioni dopo zoom
                             window.myChart.resize();
@@ -271,3 +288,156 @@ function renderLineChart(data, ticker) {
         }
     });
 }
+
+document.getElementById('stockChart').addEventListener('click', function (e) {
+    if (!calcMode) return;
+
+    const chart = window.myChart;
+    const canvasPosition = chart.canvas.getBoundingClientRect();
+
+    const xPixel = e.clientX - canvasPosition.left;
+    const yPixel = e.clientY - canvasPosition.top;
+
+    // Converti coordinate pixel in valori scala del grafico
+    const xValue = chart.scales.x.getValueForPixel(xPixel);
+    const yValue = chart.scales.y.getValueForPixel(yPixel);
+
+    console.log(`📊 Coordinate sul grafico -> X: ${xValue}, Y: ${yValue}`);
+     
+    if (selectedYValues.length===0) {clearSelectionMarkers();}
+
+    selectedYValues.push({ x: xValue, y: yValue, pixelX: xPixel, pixelY: yPixel });
+    if (selectedYValues.length === 1) {
+        drawSelectionMarker(chart, selectedYValues[0].pixelX, selectedYValues[0].pixelY);
+    } else if (selectedYValues.length === 2) {
+        console.log(selectedYValues)
+        drawSelectionLine(chart, selectedYValues[0], selectedYValues[1]);
+        drawSelectionMarker(chart, selectedYValues[1].pixelX, selectedYValues[1].pixelY);
+        calculateYDifference(selectedYValues);
+        selectedYValues = [];
+    }
+});
+
+// Funzione per disegnare un marcatore rosso
+function drawSelectionMarker(chart, x, y) {
+    drawnSegments.push({ type: "marker", x, y });
+    chart.update();
+}
+
+// Funzione per disegnare una linea
+function drawSelectionLine(chart, start, end) {
+    drawnSegments.push({ type: "line", start, end });
+    chart.update();
+}
+
+function clearSelectionMarkers() {
+    // Resetta tutte le variabili di stato
+    drawnSegments = [];
+    percentageAnnotations = [];
+    selectedYValues = [];
+    
+    // Aggiorna il grafico per rimuovere le annotazioni
+    if (window.myChart) {
+        window.myChart.options.plugins.annotation.annotations = [];
+        window.myChart.update();
+    }
+}
+
+
+// 🔹 Variabile globale per le annotazioni
+let percentageAnnotations = [];
+
+function calculateYDifference(yValues) {
+    if (yValues.length !== 2) return;
+
+    const startY = yValues[0].y;
+    const endY = yValues[1].y;
+    const percentageChange = ((endY - startY) / startY) * 100;
+    console.log(percentageChange);
+
+    // Crea annotazione testuale
+    const textAnnotation = {
+        type: 'label',
+        xValue: yValues[1].x,
+        yValue: endY-10,
+        content: `${percentageChange.toFixed(2)}%`,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#ff0000',
+        borderWidth: 1,
+        font: {
+            size: 14,
+            weight: 'bold'
+        },
+        position: {
+            x: 'left',
+            y: 'top'
+        },
+        xAdjust: -15,
+        yAdjust: -20
+    };
+
+    // Aggiungi all'array e aggiorna
+    percentageAnnotations.push(textAnnotation);
+    window.myChart.options.plugins.annotation.annotations = percentageAnnotations;
+    window.myChart.update();
+}
+
+// Plugin personalizzato per disegnare marker e segmenti senza che Chart.js li cancelli
+Chart.register({
+    id: 'customDrawing',
+    afterDraw(chart) {
+        const ctx = chart.ctx;
+        ctx.save();
+        
+        drawnSegments.forEach(segment => {
+            if (segment.type === "marker") {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                ctx.beginPath();
+                ctx.arc(segment.x, segment.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+            } else if (segment.type === "line") {
+                ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(segment.start.pixelX, segment.start.pixelY);
+                ctx.lineTo(segment.end.pixelX, segment.end.pixelY);
+                ctx.stroke();
+            }
+        });
+
+        ctx.restore();
+    }
+});
+
+// Plugin per disegnare marker, righe e etichette senza modificare il grafico
+//TODO DA TESTARE
+function customDrawing(chart) {
+    const ctx = chart.ctx;
+    ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height); // Previene sovrapposizioni
+    ctx.save();
+
+    drawnSegments.forEach(segment => {
+        if (segment.type === "marker") {
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+            ctx.beginPath();
+            ctx.arc(segment.x, segment.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+        } else if (segment.type === "line") {
+            ctx.strokeStyle = 'rgba(0, 0, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(segment.start.pixelX, segment.start.pixelY);
+            ctx.lineTo(segment.end.pixelX, segment.end.pixelY);
+            ctx.stroke();
+        }
+    });
+
+    percentageAnnotations.forEach(annotation => {
+        ctx.fillStyle = 'rgba(255, 165, 0, 0.9)';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(annotation.text, annotation.x, annotation.y);
+    });
+
+    ctx.restore();
+}
+

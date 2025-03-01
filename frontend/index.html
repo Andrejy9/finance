@@ -16,7 +16,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair"></script> <!-- Plugin crosshair -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@1.0.0"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    
     <!-- Registrazione plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial">
         // Registra i componenti necessari
@@ -26,7 +27,8 @@
             Chart.Financial.FinancialController,
             Chart.Financial.FinancialElement,
             Zoom,
-            ChartCrosshairPlugin
+            ChartCrosshairPlugin,
+            ChartAnnotation
         );
     </script>
 </head>
@@ -48,6 +50,9 @@
 
     <div class="chart-controls">
         <button onclick="resetZoom()" class="control-btn">🔍Reset Zoom</button>
+        <button id="calcGrowthButton" class="toggle-button">
+            📈 measure
+        </button>
          <!-- Selettore per il timeframe -->
     <select id="timeframe">
         <option value="1m">1m</option>
