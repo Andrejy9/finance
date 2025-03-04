@@ -33,28 +33,57 @@ button:hover {
     max-width: 400px;
 }
 
-.link-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: inline-flex;
+/* Stile della barra di navigazione */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Config a sinistra, Manager a destra */
     align-items: center;
-    gap: 5px; /* Spazio tra icona ed emoji */
-    padding: 10px 15px;
-    background-color: #007bff; /* Blu principale */
+    padding: 12px 20px;
+    background-color: #121212; /* Sfondo scuro */
+}
+
+/* Stile dei pulsanti della navbar */
+.nav-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    margin: 0 5px;
+    background: #4CAF50; /* Stesso colore dei pulsanti chart-controls */
     color: white;
-    text-decoration: none;
-    border-radius: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
     font-weight: bold;
-    transition: background-color 0.3s ease; /* Effetto hover fluido */
+    text-decoration: none;
+    transition: background 0.3s ease-in-out, transform 0.1s;
 }
 
-.link-button:hover {
-    background-color: #0056b3; /* Blu più scuro all'hover */
+.nav-button i {
+    margin-right: 8px;
 }
 
-.link-button i {
-    margin-right: 5px;
+/* Effetto hover */
+.nav-button:hover {
+    background: #45a049; /* Leggermente più scuro per il feedback */
+    transform: scale(1.05);
+}
+
+/* Stile del corpo della pagina */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+/* Stile responsive per schermi piccoli */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
 }
 
 #savedTickers {

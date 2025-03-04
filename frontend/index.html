@@ -35,9 +35,14 @@
 
 <body>
     <h2>Ifrit II</h2>
-    <a href="pages/tickersManager.html" class="link-button" title="Go to Tickers Manager">
-        <i class="fas fa-chart-line"></i> 📈 Tickers Manager
-    </a>
+    <nav class="navbar">
+        <a href="pages/configManager.html" class="nav-button" title="Go to Configuration">
+            <i class="fas fa-cog"></i> ⚙️ Config
+        </a>
+        <a href="pages/tickersManager.html" class="nav-button" title="Go to Tickers Manager">
+            <i class="fas fa-chart-line"></i> 📈 Tickers Manager
+        </a>
+    </nav>
 
     <div class="saved-tickers-container">
         <h3>📌 Saved Tickers</h3>
@@ -51,7 +56,10 @@
     <div class="chart-controls">
         <button onclick="resetZoom()" class="control-btn">🔍Reset Zoom</button>
         <button id="calcGrowthButton" class="toggle-button">
-            📈 measure
+            📏 measure
+        </button>
+        <button onclick="fetchAndCalculateSupportResistance()" id="calcSupportResistance" class="toggle-button">
+            📉📈 Support/Resistance
         </button>
          <!-- Selettore per il timeframe -->
     <select id="timeframe">
@@ -73,6 +81,7 @@
     <script src="script.js"></script>
     <script src="./scripts/tickersManager.js"></script>
     <script src="./scripts/graphManager.js"></script>
+    <script src="./scripts/technicalAnalysys/technicalAnalysisScript.js"></script>
 </body>
 
 </html>

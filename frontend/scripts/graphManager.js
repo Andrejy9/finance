@@ -227,23 +227,23 @@ function renderLineChart(data, ticker) {
                     },
                     zoom: {
                         limits: {
-                            y: { min: 'original', max: 'original' } // ✅ Mantiene fisso l'asse Y
+                            y: { min: 'original', max: 'original' }
                         },
                         wheel: {
                             enabled: true,
-                            speed: 0.05,
-                            modifierKey: 'shift' // 🔹 Richiede di premere Shift per lo zoom
+                            speed: 0.1, // Aumentato leggermente per una migliore sensibilità
+                            modifierKey: 'ctrl', // Rimosso shift per un comportamento più naturale
+                            onZoom: ({ chart, event }) => {
+                                const zoomFactor = event.deltaY > 0 ? 1.1 : 0.9; // Rileva direzione dello zoom
+                                chart.scales.x.options.min *= zoomFactor;
+                                chart.scales.x.options.max *= zoomFactor;
+                                chart.update('none'); // Aggiorna senza animazioni per migliorare la fluidità
+                            }
                         },
                         pinch: {
                             enabled: true
                         },
-                        mode: 'x',
-
-
-                        onZoom: () => {
-                            // Aggiorna dimensioni dopo zoom
-                            window.myChart.resize();
-                        }
+                        mode: 'x'
                     }
                 },
                 tooltip: {
