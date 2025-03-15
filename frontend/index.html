@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair"></script> <!-- Plugin crosshair -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@1.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
-    
+
     <!-- Registrazione plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial">
         // Registra i componenti necessari
@@ -52,6 +52,13 @@
     <input type="text" id="tickerInput" placeholder="Inserisci il ticker">
     <ul id="suggestionsList"></ul>
     <button onclick="fetchAndDrawTickerInput()">📊</button>
+    <!-- 🔽 Pulsanti storici -->
+    <button onclick="downloadHistoricalData()">
+        🗂️ fetch historical data
+    </button>
+    <button onclick="viewOnlyHistoricalData()">
+        📜 draw Historical
+    </button>
 
     <div class="chart-controls">
         <button onclick="resetZoom()" class="control-btn">🔍Reset Zoom</button>
@@ -61,16 +68,16 @@
         <button onclick="fetchAndCalculateSupportResistance()" id="calcSupportResistance" class="toggle-button">
             📉📈 Support/Resistance
         </button>
-         <!-- Selettore per il timeframe -->
-    <select id="timeframe">
-        <option value="1m">1m</option>
-        <option value="5m">5m</option>
-        <option value="15m">15m</option>
-        <option value="1h">1h</option>
-        <option value="1d">1d</option>
-        <option value="1wk">1w</option>
-        <option value="1mo">1mo</option>
-    </select>
+        <!-- Selettore per il timeframe -->
+        <select id="timeframe">
+            <option value="1m">1m</option>
+            <option value="5m">5m</option>
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="1d">1d</option>
+            <option value="1wk">1w</option>
+            <option value="1mo">1mo</option>
+        </select>
     </div>
     <div class="chart-container">
 

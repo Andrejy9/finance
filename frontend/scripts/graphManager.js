@@ -31,7 +31,6 @@ async function fetchAndDrawTickerInput() {
         const dataResponse = await fetch(`http://localhost:5050/api/financial-data/${ticker}?timeframe=${timeframe}`);
         const data = await dataResponse.json();
 
-        console.log(data);
 
         if (!data || data.length === 0) {
             alert("Nessun dato disponibile per il ticker selezionato.");
@@ -45,6 +44,36 @@ async function fetchAndDrawTickerInput() {
     } catch (error) {
         console.error("Errore nel flusso dati:", error);
         alert("Si è verificato un errore durante l'elaborazione dei dati");
+    }
+}
+
+async function viewOnlyHistoricalData() {
+    try {
+        const ticker = document.getElementById('tickerInput').value;
+        const timeframe = document.getElementById('timeframe').value;
+
+        if (!ticker) {
+            alert("Inserisci un ticker prima di procedere.");
+            return;
+        }
+
+        // 1. Recupera i dati storici salvati da MongoDB
+        const viewResponse = await fetch(`http://localhost:5050/api/historical-financial-data/${ticker}?timeframe=${timeframe}`);
+        const data = await viewResponse.json();
+        console.log(data);
+
+
+        if (!data || data.length === 0) {
+            alert("⚠️ Nessun dato storico trovato per questo ticker.");
+            return;
+        }
+
+        // 3. Disegna il grafico
+        renderLineChart(data, ticker);
+
+    } catch (error) {
+        console.error("Errore durante fetchAndDrawHistoricalData:", error);
+        alert("Errore durante l'elaborazione dei dati storici.");
     }
 }
 

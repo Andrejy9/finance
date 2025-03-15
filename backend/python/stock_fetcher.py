@@ -2,7 +2,8 @@ import sys
 import json
 from datetime import datetime
 from config.settings import settings
-from main import get_stock_data, save_to_mongodb
+from main import get_stock_data
+from database.mongoFunctions import save_to_mongodb
 
 def main():
     try:
