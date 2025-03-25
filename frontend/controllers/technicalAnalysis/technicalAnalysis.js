@@ -13,7 +13,8 @@ exports.calculateSupportResistance = async (req, res) => {
 
     try {
         // ✅ Chiama `runPythonScript` passando il nome dello script e i parametri (ticker)
-        const result = await runPythonScript(script, [ticker.toUpperCase()]);
+        //const result = await runPythonScript(script, [ticker.toUpperCase()]);
+        const result = await runPythonScript("runAction", ["analysis.support_resistance", "process_ticker", ticker.toUpperCase()]);
 
         if (result.success) {
             res.json({

@@ -3,6 +3,8 @@ import yfinance as yf
 import sys
 import json
 from datetime import datetime
+from config.settings import settings
+from database.mongoFunctions import save_to_mongodb
 
 def get_stock_data(ticker, timeframe):
     try:
@@ -49,6 +51,60 @@ def determine_period(timeframe):
     }
 
     return timeframe_to_period.get(timeframe, "6mo")  # Default a 6 mesi se non specificato
+
+def fetchTickerAndSave():
+    """
+    Funzione principale per il recupero e il salvataggio dei dati di borsa.
+    
+    Accetta due argomenti da linea di comando: symbol (es. AAPL) e timeframe (es. 1d).
+    Recupera i dati tramite `get_stock_data`, li valida e li salva in MongoDB.
+    Restituisce un dizionario JSON con il risultato dell'operazione.
+    """
+    try:
+        if len(sys.argv) != 3:
+            raise ValueError("Richiesti esattamente 2 argomenti: (symbol, timeframe)")
+
+        symbol = sys.argv[1].upper()
+        timeframe = sys.argv[2].lower()
+
+        # ✅ Controllo validità timeframe (Es: 1m, 5m, 1d, 1w, ecc.)
+        valid_timeframes = {"1m", "5m", "10m", "15m", "1h", "1d", "1wk", "1mo"}
+        if timeframe not in valid_timeframes:
+            raise ValueError(f"Timeframe non valido: {timeframe}. Usa uno tra {valid_timeframes}")
+        
+        result = get_stock_data(symbol, timeframe) 
+
+        if not result.get("success"):
+            return {
+                "success": False,
+                "error": result.get("error", "Errore sconosciuto nel fetch")
+            }
+
+        # ✅ Salva i dati su MongoDB
+        save_success = save_to_mongodb(
+            result["data"], 
+            settings.DB_NAME, 
+            f"{symbol}_{timeframe}"  # 🔹 Nome collezione distinto per timeframe
+        )
+
+        if not save_success:
+            return {
+                "success": False,
+                "error": "Fallimento nel salvataggio su MongoDB"
+            }
+
+        return {
+            "success": True,
+            "message": f"Dati {symbol} salvati correttamente",
+   
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Errore globale: {str(e)}"
+        }
+
 
 if __name__ == "__main__":
     # Default a AAPL se nessun ticker è specificato

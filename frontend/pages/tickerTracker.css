@@ -1,0 +1,91 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar {
+    background-color: #1e1e1e;
+    padding: 10px 20px;
+    text-align: left;
+  }
+  
+  .nav-button {
+    background-color: #1b1b6f;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  
+  .nav-button:hover {
+    background-color: #131149;
+  }
+  
+  .tracker-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+  }
+  
+  .tracker-container h2 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 10px;
+  }
+  
+  .description {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ccc;
+  }
+  
+  .ticker-summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .ticker-summary thead {
+    background-color: #050505;
+    color: white;
+  }
+  
+  .ticker-summary th, .ticker-summary td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+  }
+  
+  .ticker-summary tbody tr:hover {
+    background-color: #131149;
+    transition: background-color 0.2s;
+  }
+  
+  .summary-info {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 0.95em;
+    color: #ccc;
+  }
+  
+  .refresh-button {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .refresh-button:hover {
+    background-color: #45a049;
+  }

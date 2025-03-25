@@ -25,7 +25,6 @@ def get_saved_symbols(db_name, collection_name):
         return []
 
 
-
 def save_to_mongodb(data, db_name, collection_name):
     client = MongoClient(settings.MONGODB_URI)
     try:

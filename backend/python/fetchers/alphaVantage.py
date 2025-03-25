@@ -75,6 +75,87 @@ def fetch_alpha_vantage_data(ticker, interval="5min", output_size="full", api_ke
 
 
 def fetch_alpha_vantage_full_history(ticker, interval="60min", start_year=2015, end_year=None, api_key=API_KEY):
+    """
+    Scarica e salva dati storici Alpha Vantage mese per mese in MongoDB,
+    ripartendo dall'ultima data presente se già esistono dati salvati.
+    """
+    base_url = "https://www.alphavantage.co/query"
+    end_year = end_year or datetime.today().year
+    current_month = datetime.today().month
+
+    # Normalizza nome collezione per MongoDB
+    interval_normalized = "1h" if interval == "60min" else interval
+    collection_name = f"{ticker}_{interval_normalized}"
+    db_name = settings.DB_NAME_HISTORICALDATA
+
+    # Verifica se ci sono già dati per questo ticker
+    last_date_str = get_last_date_for_ticker(db_name, collection_name, ticker)
+
+    if last_date_str:
+        last_date = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M")
+        start_year = last_date.year
+        start_month = last_date.month
+    else:
+        start_month = 1
+
+    for year in range(start_year, end_year + 1):
+        for month in range(1, 13):
+            if year == start_year and month < start_month:
+                continue
+            if year == end_year and month > current_month:
+                break
+
+            month_str = f"{year}-{month:02d}"
+            print(f"⬇️ Scarico dati per {month_str}...")
+
+            params = {
+                "function": "TIME_SERIES_INTRADAY",
+                "symbol": ticker,
+                "interval": interval,
+                "apikey": api_key,
+                "outputsize": "full"
+                # Nota: Alpha Vantage non supporta direttamente il filtro per mese.
+            }
+
+            response = requests.get(base_url, params=params)
+            data = response.json()
+
+            time_series_key = next((key for key in data if "Time Series" in key), None)
+
+            if time_series_key and time_series_key in data:
+                df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
+                df.rename(columns={
+                    "1. open": "Apertura",
+                    "2. high": "Massimo",
+                    "3. low": "Minimo",
+                    "4. close": "Chiusura",
+                    "5. volume": "Volume"
+                }, inplace=True)
+
+                df.index = pd.to_datetime(df.index)
+                df = df.astype({
+                    "Apertura": float,
+                    "Massimo": float,
+                    "Minimo": float,
+                    "Chiusura": float,
+                    "Volume": int
+                })
+                df = df.reset_index().rename(columns={"index": "Data"})
+                df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
+                df["Ticker"] = ticker
+
+                save_historicaldata_to_mongodb(
+                    df.to_dict(orient="records"),
+                    db_name,
+                    collection_name
+                )
+
+                print(f"✅ Salvati {len(df)} record per {month_str}")
+            else:
+                print(f"⚠️ Nessun dato per {month_str}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+
+            # Rispetta il limite gratuito di Alpha Vantage (max 5 richieste/minuto)
+            time.sleep(12.1)
     """Scarica e salva dati storici Alpha Vantage mese per mese in MongoDB a partire dall'ultima data salvata."""
 
     base_url = "https://www.alphavantage.co/query"

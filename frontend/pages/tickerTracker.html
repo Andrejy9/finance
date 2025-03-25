@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticker Tracker</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./tickerTracker.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-button">🏠 Home</a>
+    </nav>
+
+  <div class="tracker-container">
+    <h2>📈 Ticker Tracker</h2>
+    <p class="description">Overview of tickers stored in the historical database.</p>
+
+    <table class="ticker-summary">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Oldest Date</th>
+          <th>Latest Date</th>
+          <th>Timeframe</th>
+          <th>Coverage (%)</th>
+        </tr>
+      </thead>
+      <tbody id="tickerTableBody">
+        <!-- Data will be dynamically inserted -->
+      </tbody>
+    </table>
+
+    <div class="summary-info">
+      <span>Total tickers: <strong id="totalTickers">0</strong></span>
+    </div>
+
+    <button class="refresh-button" onclick="refreshTickerData()">🔄 Refresh</button>
+  </div>
+
+  <script src="../scripts/tickerTracker.js"></script>
+</body>
+</html>
