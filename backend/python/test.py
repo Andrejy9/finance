@@ -8,7 +8,7 @@ ticker = "AAPL"
 
 # 📌 Esegui il download dei dati per AAPL (Apple) con timeframe
 
-dati =  alphaVantage.fetch_alpha_vantage_full_history("TSLA", interval="60min")
+dati =  alphaVantage.fetch_weekly_prices_and_save("AAPL")
 
 #dati = financialModelPrep.fetch_historical_fundamentals(ticker);
 print(dati)

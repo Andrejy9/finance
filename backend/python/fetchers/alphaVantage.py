@@ -4,7 +4,8 @@ import os
 import time
 from datetime import datetime
 from config.settings import settings
-from database.mongoFunctions import save_historicaldata_to_mongodb, get_last_date_for_ticker
+from database.mongoFunctions import get_last_date_for_ticker
+from database.mongoFunctions import alphaVantage
 
 # 25 requests per day, nel caso di download orario mi scarica 1 mese,
 # dovrei scaricare tutti i mesi per ciascun anno
@@ -74,290 +75,220 @@ def fetch_alpha_vantage_data(ticker, interval="5min", output_size="full", api_ke
 #     print(f"✅ Dati salvati in '{save_path}'")
 
 
-def fetch_alpha_vantage_full_history(ticker, interval="60min", start_year=2015, end_year=None, api_key=API_KEY):
+def fetch_alpha_vantage_full_history(ticker, interval="60min", api_key=API_KEY):
     """
-    Scarica e salva dati storici Alpha Vantage mese per mese in MongoDB,
-    ripartendo dall'ultima data presente se già esistono dati salvati.
+    Scarica e salva tutti i dati storici disponibili da Alpha Vantage (intraday),
+    partendo dall'ultima data disponibile in MongoDB, se presente.
     """
-    base_url = "https://www.alphavantage.co/query"
-    end_year = end_year or datetime.today().year
-    current_month = datetime.today().month
 
-    # Normalizza nome collezione per MongoDB
+    base_url = "https://www.alphavantage.co/query"
+
+    # Normalizza il nome della collezione per MongoDB
     interval_normalized = "1h" if interval == "60min" else interval
     collection_name = f"{ticker}_{interval_normalized}"
     db_name = settings.DB_NAME_HISTORICALDATA
 
-    # Verifica se ci sono già dati per questo ticker
+    # Recupera la data più recente salvata
     last_date_str = get_last_date_for_ticker(db_name, collection_name, ticker)
 
-    if last_date_str:
-        last_date = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M")
-        start_year = last_date.year
-        start_month = last_date.month
+    # Parametri della chiamata API
+    params = {
+        "function": "TIME_SERIES_INTRADAY",
+        "symbol": ticker,
+        "interval": interval,
+        "apikey": api_key,
+        "outputsize": "full"
+    }
+
+    response = requests.get(base_url, params=params)
+    data = response.json()
+
+    time_series_key = next((key for key in data if "Time Series" in key), None)
+
+    if time_series_key and time_series_key in data:
+        df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
+        df.rename(columns={
+            "1. open": "Apertura",
+            "2. high": "Massimo",
+            "3. low": "Minimo",
+            "4. close": "Chiusura",
+            "5. volume": "Volume"
+        }, inplace=True)
+
+        df.index = pd.to_datetime(df.index)
+        df = df.astype({
+            "Apertura": float,
+            "Massimo": float,
+            "Minimo": float,
+            "Chiusura": float,
+            "Volume": int
+        })
+
+        df = df.reset_index().rename(columns={"index": "Data"})
+        df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
+        df["Ticker"] = ticker
+
+        # Se c'è una data salvata, filtra i nuovi record
+        if last_date_str:
+            df = df[df["Data"] > last_date_str]
+
+        # Salvataggio in MongoDB
+        if not df.empty:
+            alphaVantage.save_historicaldata_to_mongodb(
+                df.to_dict(orient="records"),
+                db_name,
+                collection_name
+            )
+            print(f"✅ Salvati {len(df)} nuovi record.")
+        else:
+            print("ℹ️ Nessun nuovo dato da salvare.")
+
     else:
-        start_month = 1
+        print(f"⚠️ Errore nella risposta. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
 
-    for year in range(start_year, end_year + 1):
-        for month in range(1, 13):
-            if year == start_year and month < start_month:
-                continue
-            if year == end_year and month > current_month:
-                break
+def fetch_income_statement_and_save(ticker, api_key=API_KEY):
+    """
+    Scarica i dati di bilancio (Income Statement) annuali e trimestrali da Alpha Vantage
+    e li salva su MongoDB usando la funzione save_financial_reports_to_mongodb.
+    """
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "INCOME_STATEMENT",
+        "symbol": ticker,
+        "apikey": api_key
+    }
 
-            month_str = f"{year}-{month:02d}"
-            print(f"⬇️ Scarico dati per {month_str}...")
+    response = requests.get(url, params=params)
+    data = response.json()
 
-            params = {
-                "function": "TIME_SERIES_INTRADAY",
-                "symbol": ticker,
-                "interval": interval,
-                "apikey": api_key,
-                "outputsize": "full"
-                # Nota: Alpha Vantage non supporta direttamente il filtro per mese.
-            }
+    if "annualReports" not in data or "quarterlyReports" not in data:
+        print(f"⚠️ Errore o dati mancanti per {ticker}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+        return
 
-            response = requests.get(base_url, params=params)
-            data = response.json()
+    # Connessione a MongoDB
+    db_name = settings.DB_NAME_FUNDAMENTALS
 
-            time_series_key = next((key for key in data if "Time Series" in key), None)
+    # Aggiungi ticker e timestamp a ogni record
+    timestamp = datetime.utcnow().isoformat()
 
-            if time_series_key and time_series_key in data:
-                df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-                df.rename(columns={
-                    "1. open": "Apertura",
-                    "2. high": "Massimo",
-                    "3. low": "Minimo",
-                    "4. close": "Chiusura",
-                    "5. volume": "Volume"
-                }, inplace=True)
+    def enrich(records):
+        for report in records:
+            report["Ticker"] = ticker
+            report["FetchedAt"] = timestamp
+        return records
 
-                df.index = pd.to_datetime(df.index)
-                df = df.astype({
-                    "Apertura": float,
-                    "Massimo": float,
-                    "Minimo": float,
-                    "Chiusura": float,
-                    "Volume": int
-                })
-                df = df.reset_index().rename(columns={"index": "Data"})
-                df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-                df["Ticker"] = ticker
+    # Enrich e salvataggio annualReports
+    annual_reports = enrich(data["annualReports"])
+    alphaVantage.save_financial_reports_to_mongodb(annual_reports, db_name, f"{ticker}_income_annual")
 
-                save_historicaldata_to_mongodb(
-                    df.to_dict(orient="records"),
-                    db_name,
-                    collection_name
-                )
+    # Enrich e salvataggio quarterlyReports
+    quarterly_reports = enrich(data["quarterlyReports"])
+    alphaVantage.save_financial_reports_to_mongodb(quarterly_reports, db_name, f"{ticker}_income_quarterly")
 
-                print(f"✅ Salvati {len(df)} record per {month_str}")
-            else:
-                print(f"⚠️ Nessun dato per {month_str}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+def fetch_dividends_and_save(ticker, api_key=API_KEY):
+    """
+    Scarica i dati sui dividendi da Alpha Vantage e li salva su MongoDB
+    usando la funzione save_dividends_to_mongodb.
+    """
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "DIVIDENDS",
+        "symbol": ticker,
+        "apikey": api_key
+    }
 
-            # Rispetta il limite gratuito di Alpha Vantage (max 5 richieste/minuto)
-            time.sleep(12.1)
-    """Scarica e salva dati storici Alpha Vantage mese per mese in MongoDB a partire dall'ultima data salvata."""
+    response = requests.get(url, params=params)
+    data = response.json()
 
-    base_url = "https://www.alphavantage.co/query"
-    inverval_converted = interval     # ✅ Se l'intervallo è '1h', lo converto in '60min' per Alpha Vantage
-    if interval == "60min":
-        inverval_converted = "1h"
-    collection_name = f"{ticker}_{inverval_converted}"
-    db_name = settings.DB_NAME_HISTORICALDATA
-    end_year = end_year or datetime.today().year
-    current_month = datetime.today().month
+    if "data" not in data:
+        print(f"⚠️ Errore o dati mancanti per {ticker}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+        return
 
-    # 🔍 Recupera la data più recente presente su MongoDB
-    last_date_str = get_last_date_for_ticker(db_name, collection_name, ticker)
+    db_name = settings.DB_NAME_FUNDAMENTALS
+    timestamp = datetime.utcnow().isoformat()
 
-    if last_date_str:
-        last_date = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M")
-        start_year = last_date.year
-        start_month = last_date.month
-    else:
-        start_month = 1  # se non ci sono dati, parte da gennaio
+    def enrich(records):
+        for report in records:
+            report["Ticker"] = ticker
+            report["FetchedAt"] = timestamp
+        return records
 
-    for year in range(start_year, end_year + 1):
-        for month in range(1, 13):
-            if year == start_year and month < start_month:
-                continue
-            if year == end_year and month > current_month:
-                break
+    enriched_dividends = enrich(data["data"])
+    alphaVantage.save_dividends_to_mongodb(enriched_dividends, db_name, f"{ticker}_dividends")
 
-            month_str = f"{year}-{month:02d}"
-            print(f"⬇️ Scarico dati per {month_str}...")
+def fetch_balance_sheet_and_save(ticker, api_key=API_KEY):
+    """
+    Scarica i dati di balance sheet (annual e quarterly) da Alpha Vantage
+    e li salva su MongoDB usando la funzione save_balance_sheets_to_mongodb.
+    """
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "BALANCE_SHEET",
+        "symbol": ticker,
+        "apikey": api_key
+    }
 
-            params = {
-                "function": "TIME_SERIES_INTRADAY",
-                "symbol": ticker,
-                "interval": interval,
-                "apikey": api_key,
-                "outputsize": "full",
-                "month": month_str
-            }
+    response = requests.get(url, params=params)
+    data = response.json()
 
-            response = requests.get(base_url, params=params)
-            data = response.json()
+    if "annualReports" not in data or "quarterlyReports" not in data:
+        print(f"⚠️ Errore o dati mancanti per {ticker}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+        return
 
-            time_series_key = next((key for key in data if "Time Series" in key), None)
+    db_name = settings.DB_NAME_FUNDAMENTALS
+    timestamp = datetime.utcnow().isoformat()
 
-            if time_series_key and time_series_key in data:
-                df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-                df.rename(columns={
-                    "1. open": "Apertura",
-                    "2. high": "Massimo",
-                    "3. low": "Minimo",
-                    "4. close": "Chiusura",
-                    "5. volume": "Volume"
-                }, inplace=True)
+    def enrich(records):
+        for report in records:
+            report["Ticker"] = ticker
+            report["FetchedAt"] = timestamp
+        return records
 
-                df.index = pd.to_datetime(df.index)
-                df = df.astype({
-                    "Apertura": float,
-                    "Massimo": float,
-                    "Minimo": float,
-                    "Chiusura": float,
-                    "Volume": int
-                })
-                df = df.reset_index().rename(columns={"index": "Data"})
-                df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-                df["Ticker"] = ticker
+    # Enrich e salvataggio annuale
+    annual_reports = enrich(data["annualReports"])
+    alphaVantage.save_balance_sheets_to_mongodb(annual_reports, db_name, f"{ticker}_balance_annual")
 
-                save_historicaldata_to_mongodb(
-                    df.to_dict(orient="records"),
-                    db_name,
-                    collection_name
-                )
+    # Enrich e salvataggio trimestrale
+    quarterly_reports = enrich(data["quarterlyReports"])
+    alphaVantage.save_balance_sheets_to_mongodb(quarterly_reports, db_name, f"{ticker}_balance_quarterly")
 
-            else:
-                print(f"⚠️ Nessun dato per {month_str}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+def fetch_weekly_prices_and_save(ticker, api_key=API_KEY):
+    """
+    Scarica i dati settimanali (non adjusted) da Alpha Vantage
+    e li salva su MongoDB.
+    """
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "TIME_SERIES_WEEKLY",
+        "symbol": ticker,
+        "apikey": api_key
+    }
 
-            time.sleep(12.1)
-    """Scarica e salva dati storici Alpha Vantage mese per mese negli ultimi 10 anni in MongoDB."""
+    response = requests.get(url, params=params)
+    data = response.json()
 
-    base_url = "https://www.alphavantage.co/query"
-    end_year = end_year or datetime.today().year
-    current_month = datetime.today().month
+    if "Weekly Time Series" not in data:
+        print(f"⚠️ Errore o dati mancanti per {ticker}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+        return
 
-    for year in range(start_year, end_year + 1):
-        for month in range(1, 13):
-            if year == end_year and month > current_month:
-                break
+    db_name = settings.DB_NAME_WEEKLY_TICKERS
+    collection_name = f"{ticker}_weekly"
 
-            month_str = f"{year}-{month:02d}"
-            print(f"⬇️ Scarico dati per {month_str}...")
+    time_series = data["Weekly Time Series"]
+    timestamp = datetime.utcnow().isoformat()
 
-            params = {
-                "function": "TIME_SERIES_INTRADAY",
-                "symbol": ticker,
-                "interval": interval,
-                "apikey": api_key,
-                "outputsize": "full",
-                "month": month_str
-            }
+    records = []
+    for date_str, values in time_series.items():
+        record = {
+            "Ticker": ticker,
+            "Date": date_str,
+            "FetchedAt": timestamp,
+            "Open": float(values["1. open"]),
+            "High": float(values["2. high"]),
+            "Low": float(values["3. low"]),
+            "Close": float(values["4. close"]),
+            "Volume": int(values["5. volume"])
+        }
+        records.append(record)
 
-            response = requests.get(base_url, params=params)
-            data = response.json()
-
-            time_series_key = next((key for key in data if "Time Series" in key), None)
-
-            if time_series_key and time_series_key in data:
-                df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-                df.rename(columns={
-                    "1. open": "Apertura",
-                    "2. high": "Massimo",
-                    "3. low": "Minimo",
-                    "4. close": "Chiusura",
-                    "5. volume": "Volume"
-                }, inplace=True)
-
-                df.index = pd.to_datetime(df.index)
-                df = df.astype({
-                    "Apertura": float,
-                    "Massimo": float,
-                    "Minimo": float,
-                    "Chiusura": float,
-                    "Volume": int
-                })
-                df = df.reset_index().rename(columns={"index": "Data"})
-                df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-                df["Ticker"] = ticker
-
-                # 🔸 Salvataggio su MongoDB mese per mese
-                save_historicaldata_to_mongodb(
-                    df.to_dict(orient="records"),
-                    settings.DB_NAME_HISTORICALDATA,
-                    f"{ticker}_{interval}"
-                )
-
-            else:
-                print(f"⚠️ Nessun dato per {month_str}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
-
-            time.sleep(12.1)
-    """Scarica dati storici Alpha Vantage mese per mese per coprire fino a 10+ anni."""
-
-    base_url = "https://www.alphavantage.co/query"
-    all_data = []
-
-    end_year = end_year or datetime.today().year
-    current_month = datetime.today().month
-
-    for year in range(start_year, end_year + 1):
-        for month in range(1, 13):
-            # Evita mesi futuri
-            if year == end_year and month > current_month:
-                break
-
-            month_str = f"{year}-{month:02d}"
-            print(f"⬇️ Scarico dati per {month_str}...")
-
-            params = {
-                "function": "TIME_SERIES_INTRADAY",
-                "symbol": ticker,
-                "interval": interval,
-                "apikey": api_key,
-                "outputsize": "full",
-                "month": month_str
-            }
-
-            response = requests.get(base_url, params=params)
-            data = response.json()
-
-            time_series_key = next((key for key in data if "Time Series" in key), None)
-
-            if time_series_key and time_series_key in data:
-                df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-                df.rename(columns={
-                    "1. open": "Apertura",
-                    "2. high": "Massimo",
-                    "3. low": "Minimo",
-                    "4. close": "Chiusura",
-                    "5. volume": "Volume"
-                }, inplace=True)
-
-                df.index = pd.to_datetime(df.index)
-                df = df.astype({
-                    "Apertura": float,
-                    "Massimo": float,
-                    "Minimo": float,
-                    "Chiusura": float,
-                    "Volume": int
-                })
-                df = df.reset_index().rename(columns={"index": "Data"})
-                df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-
-                all_data.append(df)
-            else:
-                print(f"⚠️ Nessun dato per {month_str}. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
-
-            # ⏱️ Rispetta il limite di 5 richieste al minuto (gratuito)
-            time.sleep(12.1)
-
-    # Combina tutti i dati in un DataFrame unico
-    if all_data:
-        final_df = pd.concat(all_data).drop_duplicates(subset=["Data"]).sort_values("Data").reset_index(drop=True)
-        print(f"✅ Completato. Totale righe: {len(final_df)}")
-        return final_df
-    else:
-        print("❌ Nessun dato recuperato.")
-        return None
+    alphaVantage.save_weekly_prices_to_mongodb(records, db_name, collection_name)

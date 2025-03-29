@@ -61,25 +61,6 @@ def update_last_screener(screener_name):
     )
 
 
-# funzione per salvare dati storici su M
-def save_historicaldata_to_mongodb(data, db_name, collection_name):
-    """Salva dati in MongoDB evitando duplicati per 'Data' e 'Ticker'."""
-    db = client[db_name]
-    collection = db[collection_name]
-
-    inserted_count = 0
-    for record in data:
-        query = {"Data": record["Data"], "Ticker": record["Ticker"]}
-        if not collection.find_one(query):
-            collection.insert_one(record)
-            inserted_count += 1
-
-    if inserted_count:
-        print(f"📅 Salvati {inserted_count} nuovi record in '{collection_name}'")
-        return True
-    else:
-        print(f"⚠️ Nessun nuovo dato inserito in '{collection_name}' (tutti duplicati)")
-        return False
 
 
 def get_last_date_for_ticker(db_name, collection_name, ticker):
@@ -162,4 +143,120 @@ def save_to_mongodb(data, db_name, collection_name):
         return False
     finally:
         client.close()
-   
+
+
+class alphaVantage:
+    def save_historicaldata_to_mongodb(data, db_name, collection_name):
+        """Salva dati in MongoDB evitando duplicati per 'Data' e 'Ticker'."""
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {"Data": record["Data"], "Ticker": record["Ticker"]}
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📅 Salvati {inserted_count} nuovi record in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dato inserito in '{collection_name}' (tutti duplicati)")
+            return False
+
+    def save_financial_reports_to_mongodb(data, db_name, collection_name):
+        """
+        Salva report finanziari (annual o quarterly) in MongoDB evitando duplicati
+        basati su 'fiscalDateEnding' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "fiscalDateEnding": record["fiscalDateEnding"],
+                "Ticker": record["Ticker"]
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📊 Salvati {inserted_count} nuovi report in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo report inserito in '{collection_name}' (tutti duplicati)")
+            return False
+    
+    def save_balance_sheets_to_mongodb(data, db_name, collection_name):
+        """
+        Salva dati di balance sheet in MongoDB evitando duplicati
+        basati su 'fiscalDateEnding' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "fiscalDateEnding": record["fiscalDateEnding"],
+                "Ticker": record["Ticker"]
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📘 Salvati {inserted_count} balance sheet in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo balance sheet inserito in '{collection_name}' (tutti duplicati)")
+            return False
+
+    def save_dividends_to_mongodb(data, db_name, collection_name):
+        db = client[db_name]
+        collection = db[collection_name]
+        inserted_count = 0
+
+        for record in data:
+            query = {
+                "ex_dividend_date": record.get("ex_dividend_date"),
+                "Ticker": record.get("Ticker")
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"💰 Salvati {inserted_count} nuovi dividendi in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dividendo inserito in '{collection_name}' (tutti duplicati)")
+            return False
+        
+    def save_weekly_prices_to_mongodb(data, db_name, collection_name):
+        """
+        Salva dati settimanali dei prezzi in MongoDB evitando duplicati
+        basati su 'Date' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "Date": record["Date"],
+                "Ticker": record["Ticker"]
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📈 Salvati {inserted_count} dati settimanali in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dato settimanale inserito in '{collection_name}' (tutti duplicati)")
+            return False

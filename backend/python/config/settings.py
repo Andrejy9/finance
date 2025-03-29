@@ -8,5 +8,6 @@ class Settings:
     ALPHAVANTAGE_API_1 = "Z5LNJRNRO7FSEZ9B"
     FMP_API_KEY = "EwQ619E1ipgAvXNO7KbubN6RuyO0aKqO"
     DB_NAME_FUNDAMENTALS = "fundamentalsDB"
+    DB_NAME_WEEKLY_TICKERS = "weeklyPrices"
     
 settings = Settings()
