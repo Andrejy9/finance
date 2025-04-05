@@ -22,11 +22,27 @@
           <th>Ticker</th>
           <th>Oldest Date</th>
           <th>Latest Date</th>
-          <th>Timeframe</th>
+          <th>Timeframe (days)</th>
           <th>Coverage (%)</th>
         </tr>
       </thead>
       <tbody id="tickerTableBody">
+        <!-- Data will be dynamically inserted -->
+      </tbody>
+    </table>
+    
+    <h2>Fundamentals Status</h2>
+    <p>Total Fundamentals: <span id="totalFundamentals">0</span></p>
+    <table class="ticker-summary">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Latest Date</th>
+          <th>Days Ago</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="fundamentalsTableBody">
         <!-- Data will be dynamically inserted -->
       </tbody>
     </table>
@@ -35,7 +51,7 @@
       <span>Total tickers: <strong id="totalTickers">0</strong></span>
     </div>
 
-    <button class="refresh-button" onclick="refreshTickerData()">🔄 Refresh</button>
+    <button class="refresh-button" onclick="refreshStatusData()">🔄 Refresh</button>
   </div>
 
   <script src="../scripts/tickerTracker.js"></script>
