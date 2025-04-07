@@ -86,6 +86,7 @@ document.getElementById('calcGrowthButton').addEventListener('click', function (
 function renderLineChart(data, ticker) {
     const ctx = document.getElementById("stockChart").getContext("2d");
     const canvas = document.getElementById("stockChart");
+    //console.log(data);
 
 
     // 1. Aggiungi variabili per tracciare la posizione del mouse
@@ -102,7 +103,7 @@ function renderLineChart(data, ticker) {
             o: entry.Apertura,
             h: entry.Max || entry.Massimo,
             l: entry.Min || entry.Minimo,
-            c: entry.Chiusura
+            c: entry.Chiusura,
         }))
         .sort((a, b) => a.x - b.x);
 
@@ -145,7 +146,8 @@ function renderLineChart(data, ticker) {
         h: d.h,
         l: d.l,
         c: d.c,
-        rawDate: d.x // Conserva la data originale per i tooltip
+        v: data[index].Volume || 0, // volume
+        rawDate: d.x
     }));
 
     if (window.myChart) window.myChart.destroy();
@@ -193,17 +195,29 @@ function renderLineChart(data, ticker) {
     window.myChart = new Chart(ctx, {
         type: 'candlestick',
         data: {
-            datasets: [{
-                label: `${ticker}`,
-                data: indexedData,
-                borderColor: 'rgba(0, 0, 0, 0.8)',
-                borderWidth: 1,
-                color: {
-                    up: '#00ff00',
-                    down: '#ff0000',
-                    unchanged: '#0000ff'
+            datasets: [
+                {
+                    type: 'candlestick',
+                    label: `${ticker}`,
+                    data: indexedData,
+                    borderColor: 'rgba(0, 0, 0, 0.8)',
+                    borderWidth: 1,
+                    color: {
+                        up: '#00ff00',
+                        down: '#ff0000',
+                        unchanged: '#0000ff'
+                    },
+                    yAxisID: 'y', // prezzo
+                },
+                {
+                    type: 'bar',
+                    label: 'Volume',
+                    data: indexedData.map((d, i) => ({ x: d.x, y: d.v })),
+                    backgroundColor: 'rgba(0, 123, 255, 0.3)',
+                    borderWidth: 0,
+                    yAxisID: 'volume', // volume su asse separato
                 }
-            }]
+            ]
         },
         options: {
             responsive: true,
@@ -239,6 +253,26 @@ function renderLineChart(data, ticker) {
                         axis.left = 0; // Blocca a sinistra
                         axis.right = axis.chart.width; // Estendi a destra
                     }
+                },
+                volume: {
+                    position: 'right',
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Volume',
+                        padding: { top: 10, bottom: 10 }
+                    },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        callback: value => {
+                            if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+                            if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
+                            return value;
+                        }
+                    },
+                    beginAtZero: true
                 }
             },
             plugins: {
@@ -286,7 +320,11 @@ function renderLineChart(data, ticker) {
                             borderWidth: 2
                         }),
                         label: function (context) {
-                            return `📍 ${context.raw.rawDate.toLocaleString()} | O: ${context.raw.o} | H: ${context.raw.h} | L: ${context.raw.l} | C: ${context.raw.c}`;
+                            if (context.dataset.type === 'candlestick') {
+                                return `📍 ${context.raw.rawDate.toLocaleString()} | O: ${context.raw.o} | H: ${context.raw.h} | L: ${context.raw.l} | C: ${context.raw.c}`;
+                            } else if (context.dataset.type === 'bar') {
+                                return `📊 Volume: ${context.raw.y.toLocaleString()}`;
+                            }
                         }
                     }
                 },

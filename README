@@ -68,3 +68,7 @@ The system follows a **modular architecture**, making it extensible for future A
 - ⏳ AI Model for Predicting Market Trends
 - ⏳ Automated Trading Bot
 
+
+## TODO
+- scrape data from https://finviz.com/quote.ashx?t=TSLA&ty=c&ta=1&p=d
+
