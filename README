@@ -61,9 +61,10 @@ Upcoming features include real-time market data scraping, deeper fundamental ana
    ```env
    MONGO_URI=mongodb://localhost:27017
    ```
-4. Run the server:
+4. To start the frontend server:
    ```sh
-   npm start
+   cd frontend
+   node server
    ```
 
 
