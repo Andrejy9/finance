@@ -434,6 +434,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+    if (document.getElementById("historicalTickersList")) {
+        await fetchHistoricalTickers();
+    }
+});
+
 function handleCheckboxClick(tickerSymbol) {
     // Controlla se siamo in index.html
     if (window.location.pathname.endsWith("index.html")) {
@@ -535,3 +541,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fetchTickers();
 });
+
+// Aggiunta della funzione addToHistoricalTickers sopra removeFromHistoricalTickers
+function addToHistoricalTickers() {
+    const currentListItems = document.querySelectorAll("#historicalTickersList li");
+    const currentTickers = new Set(Array.from(currentListItems).map(li => li.textContent.trim()));
+
+    selectedTickers.forEach(ticker => currentTickers.add(ticker));
+
+    const updatedTickers = Array.from(currentTickers);
+    console.log(updatedTickers);
+
+    fetch("http://localhost:5050/api/save-historical-tickers", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tickers: updatedTickers }),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (!result || !Array.isArray(result.tickers)) {
+            throw new Error("Invalid response from server.");
+        }
+        updateHistoricalTickersUI(result.tickers);
+        //alert("Selected tickers added to historical list.");
+    })
+    .catch(error => {
+        console.error("Error adding historical tickers:", error);
+        alert("Error: " + error.message);
+    });
+}
+
+// Aggiunta della funzione removeFromHistoricalTickers sotto saveHistoricalTickers
+function removeFromHistoricalTickers() {
+    const currentListItems = document.querySelectorAll("#historicalTickersList li");
+    const currentTickers = Array.from(currentListItems).map(li => li.textContent.trim());
+
+    const updatedTickers = currentTickers.filter(ticker => !selectedTickers.has(ticker));
+
+    fetch("http://localhost:5050/api/save-historical-tickers", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tickers: updatedTickers }),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (!result || !Array.isArray(result.tickers)) {
+            throw new Error("Invalid response from server.");
+        }
+        updateHistoricalTickersUI(result.tickers);
+        //alert("Selected tickers removed from historical list.");
+    })
+    .catch(error => {
+        console.error("Error removing historical tickers:", error);
+        alert("Error: " + error.message);
+    });
+}
+
+function updateHistoricalTickersUI(tickers) {
+    const list = document.getElementById("historicalTickersList");
+    if (!list) return;
+
+    list.innerHTML = ""; // Pulisce la lista esistente
+
+    tickers.forEach(ticker => {
+        const li = document.createElement("li");
+        li.textContent = ticker;
+        list.appendChild(li);
+    });
+}
+
+async function fetchHistoricalTickers() {
+    try {
+        const response = await fetch("http://localhost:5050/api/saved-historical-tickers");
+        if (!response.ok) throw new Error("Failed to fetch historical tickers");
+
+        const result = await response.json();
+        if (Array.isArray(result.tickers)) {
+            updateHistoricalTickersUI(result.tickers);
+        } else {
+            console.warn("Unexpected data format for historical tickers.");
+        }
+    } catch (error) {
+        console.error("Error loading historical tickers:", error);
+    }
+}

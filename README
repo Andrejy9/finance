@@ -1,30 +1,39 @@
 # Personal Finance
 
 ## Overview
-This project is a **Python and Node.js, MongoDB-based finance management system** designed to monitor a customizable number of tickers. Future implementations will include historical data downloads, web scraping for real-time market insights, and fundamental analysis. These enhancements, combined with AI-driven analytics, will support medium-term investment decision-making.
+This project is a **finance management system** built with Python, Node.js, and MongoDB, designed to track and analyze a customizable list of financial tickers.
+
+At the moment, historical data is downloaded manually, but the system is already structured to support automatic data collection using scraping scripts and rotating API keys. It's fully prepared for large-scale data processing, including cleaning, normalization, and the application of machine learning models to extract insights.
+
+Upcoming features include real-time market data scraping, deeper fundamental analysis, and AI-powered analytics. Looking ahead, the platform is designed to be flexible and forward-looking, with plans to experiment with advanced techniques like Quantum Machine Learning (QML) to further improve forecasting and decision-making.
 
 ## Features
-- **Multi-database support**: Uses multiple MongoDB databases (`finance`, `tickers`) to manage ticker data.
+- **Multi-database support**: Uses multiple MongoDB databases to manage data.
 - **Duplicate prevention**: Ensures that the same ticker is not saved multiple times.
 - **REST API endpoints**: Provides endpoints for saving and retrieving ticker information.
 - **Scalability**: Designed to support additional features like **AI-driven trading insights** and **automated risk management**.
 
-## Architecture
-The system follows a **modular architecture**, making it extensible for future AI and trading logic enhancements.
 
 ### Current Architecture
-1. **Frontend (under development)**:
-   - Will provide a UI for interacting with the finance system.
 
+1. **Frontend (JavaScript, under development)**:
+   - A browser-based interface for managing tickers, viewing historical data, and triggering analytics.
+   - Communicates with the backend via REST API endpoints.
 
-2. **Backend (Node.js, Express, Python)**:
-   - Handles API requests for saving and retrieving tickers.
-   - Prevents duplicate entries before insertion.
-   - Manages database connections dynamically.
+2. **Backend (Node.js & Python)**:
+   - The Node.js layer handles routing, user interactions, and database operations (MongoDB).
+   - Python modules are invoked for heavy data processing and AI-related computations.
+   - Communication between Node.js and Python occurs via child processes or HTTP calls using local endpoints 
 
+   
 3. **Database (MongoDB)**:
-   - `tickers` database: Stores market data for various tickers.
-   - `finance` database: Manages user-specific saved tickers.
+| Database             | Contenuto principale                                |
+|----------------------|-----------------------------------------------------|
+| `tickers`            | Ticker salvati e configurazioni utente             |
+| `finance`            | Dati principali utente (preferiti, cronologia, ecc.)|
+| `finance_historical` | Prezzi storici giornalieri per ogni ticker         |
+| `weeklyPrices`       | Prezzi settimanali dei titoli                      |
+| `fundamentalsDB`     | Bilanci, dividendi e dati fondamentali             |
 
 ### Planned Enhancements
 - **AI & Machine Learning Integration**:
@@ -63,7 +72,7 @@ The system follows a **modular architecture**, making it extensible for future A
 
 ## Future Roadmap
 - ✅ Implement Ticker Storage and API
-- ⏳ Implement historical price data download from web
+- ✅ Implement historical price data download from web
 - ⏳ Implement other scraping logics (news, recent tweets)
 - ⏳ AI Model for Predicting Market Trends
 - ⏳ Automated Trading Bot
@@ -71,4 +80,3 @@ The system follows a **modular architecture**, making it extensible for future A
 
 ## TODO
 - scrape data from https://finviz.com/quote.ashx?t=TSLA&ty=c&ta=1&p=d
-

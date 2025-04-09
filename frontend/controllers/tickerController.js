@@ -112,4 +112,48 @@ exports.deleteTicker = async (req, res) => {
   } catch (error) {
       res.status(500).json({ message: "Errore interno del server" });
   }
-}
+};
+
+exports.saveHistoricalTickers = async (req, res) => {
+  try {
+    const financeDb = mongoose.connection.useDb("finance");
+    const historicalTickersCollection = financeDb.collection("historicaltickers");
+
+    const { tickers } = req.body;
+    if (!Array.isArray(tickers)) {
+      return res.status(400).json({ message: "Invalid tickers format" });
+    }
+
+    // Cancella tutti i documenti esistenti
+    await historicalTickersCollection.deleteMany({});
+
+    // Inserisce i nuovi ticker
+    const documents = tickers.map(symbol => ({
+      symbol: symbol.toUpperCase(),
+      savedAt: new Date()
+    }));
+
+    await historicalTickersCollection.insertMany(documents);
+
+    res.json({ message: "Historical tickers updated", tickers: documents.map(d => d.symbol) });
+
+  } catch (error) {
+    console.error("Errore nel salvataggio dei ticker storici:", error);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+};
+
+exports.getSavedHistoricalTickers = async (req, res) => {
+  try {
+    const financeDb = mongoose.connection.useDb("finance");
+    const collection = financeDb.collection("historicaltickers");
+
+    const documents = await collection.find({}).toArray();
+    const tickers = documents.map(doc => doc.symbol);
+
+    res.json({ tickers });
+  } catch (error) {
+    console.error("Errore nel recupero dei ticker storici:", error);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+};

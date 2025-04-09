@@ -43,7 +43,9 @@ function createFundamentalsTableRows(fundamentalInfo) {
     const statusLabel = data.isRecent ? '✔️ Recent' : '⚠️ Outdated';
 
     tr.innerHTML = `
-      <td>${ticker} - ${type}</td>
+      <td>${ticker} - ${type}</td>      
+      <td>${data.count ?? "-"}</td>
+      <td>${data.oldestDate || "-"}</td>
       <td>${data.latestDate || "-"}</td>
       <td>${data.daysAgo ?? "-"}</td>
       <td style="color: ${statusColor}; font-weight: bold;">${statusLabel}</td>

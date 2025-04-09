@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ticker Tracker</title>
   <link rel="stylesheet" href="../styles.css" />
   <link rel="stylesheet" href="./tickerTracker.css" />
 </head>
+
 <body>
-    <nav class="navbar">
-        <a href="../index.html" class="nav-button">🏠 Home</a>
-    </nav>
+  <nav class="navbar">
+    <a href="../index.html" class="nav-button">🏠 Home</a>
+  </nav>
 
   <div class="tracker-container">
     <h2>📈 Ticker Tracker</h2>
@@ -30,13 +32,17 @@
         <!-- Data will be dynamically inserted -->
       </tbody>
     </table>
-    
+    <div class="summary-info">
+      <span>Total tickers: <strong id="totalTickers">0</strong></span>
+    </div>
+
     <h2>Fundamentals Status</h2>
-    <p>Total Fundamentals: <span id="totalFundamentals">0</span></p>
     <table class="ticker-summary">
       <thead>
         <tr>
           <th>Type</th>
+          <th>Nr of entries</th>
+          <th>Oldest Date</th>
           <th>Latest Date</th>
           <th>Days Ago</th>
           <th>Status</th>
@@ -45,10 +51,10 @@
       <tbody id="fundamentalsTableBody">
         <!-- Data will be dynamically inserted -->
       </tbody>
-    </table>
 
+    </table>
     <div class="summary-info">
-      <span>Total tickers: <strong id="totalTickers">0</strong></span>
+      <p>Total Fundamentals: <span id="totalFundamentals">0</span></p>
     </div>
 
     <button class="refresh-button" onclick="refreshStatusData()">🔄 Refresh</button>
@@ -56,4 +62,5 @@
 
   <script src="../scripts/tickerTracker.js"></script>
 </body>
+
 </html>

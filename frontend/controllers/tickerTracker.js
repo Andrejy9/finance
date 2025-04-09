@@ -16,13 +16,18 @@ exports.getHistoricalTickersStatus = async (req, res) => {
     for (const collectionName of financeCollectionNames) {
       const collection = financeHistoricalDb.collection(collectionName);
 
-      const oldestRecord = await collection.find().sort({ Data: 1 }).limit(1).toArray();
-      const latestRecord = await collection.find().sort({ Data: -1 }).limit(1).toArray();
+      const [oldestRecord, latestRecord] = await Promise.all([
+        collection.find().sort({ Data: 1 }).limit(1).toArray(),
+        collection.find().sort({ Data: -1 }).limit(1).toArray(),
+      ]);
+
+      const totalCount = await collection.countDocuments();
 
       if (!oldestRecord.length || !latestRecord.length) {
         tickerStatuses.push({
           ticker: collectionName,
           percentage: 0,
+          count: totalCount,
           oldestDate: null,
           latestDate: null,
         });
@@ -39,6 +44,7 @@ exports.getHistoricalTickersStatus = async (req, res) => {
       tickerStatuses.push({
         ticker: collectionName,
         percentage: coveragePercentage,
+        count: totalCount,
         oldestDate: oldestDate.format('YYYY-MM-DD'),
         latestDate: latestDate.format('YYYY-MM-DD'),
       });
@@ -71,28 +77,41 @@ exports.getHistoricalTickersStatus = async (req, res) => {
           dateField = "ex_dividend_date";
         }
 
-        const latestDoc = await collection
+        const [latestDoc] = await collection
           .find({ [dateField]: { $exists: true } })
           .sort({ [dateField]: -1 })
           .limit(1)
           .toArray();
 
-        if (latestDoc.length === 0) {
+        const [oldestDoc] = await collection
+          .find({ [dateField]: { $exists: true } })
+          .sort({ [dateField]: 1 })
+          .limit(1)
+          .toArray();
+
+        const totalCount = await collection.countDocuments();
+
+        if (!latestDoc || !oldestDoc) {
           entry[type] = {
             latestDate: null,
+            oldestDate: null,
+            count: totalCount,
             daysAgo: null,
             isRecent: false
           };
           continue;
         }
 
-        const latestDate = moment(latestDoc[0][dateField]);
+        const latestDate = moment(latestDoc[dateField]);
+        const oldestDate = moment(oldestDoc[dateField]);
         const now = moment();
         const daysAgo = now.diff(latestDate, 'days');
         const isRecent = daysAgo <= 180;
 
         entry[type] = {
           latestDate: latestDate.format('YYYY-MM-DD'),
+          oldestDate: oldestDate.format('YYYY-MM-DD'),
+          count: totalCount,
           daysAgo,
           isRecent
         };

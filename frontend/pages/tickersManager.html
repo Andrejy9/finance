@@ -23,7 +23,7 @@
         <div class="filter-group">
             <label for="tickerInput">Find ticker:</label>
             <input type="text" id="tickerInput" onkeyup="applyFilters()" placeholder="Insert ticker for categories">
-    <ul id="suggestionsList"></ul>
+            <ul id="suggestionsList"></ul>
         </div>
     </div>
 
@@ -32,9 +32,22 @@
     
     <button onclick="saveSelectedTickers()">Save Ticker</button>
 
-    <div class="saved-tickers-container">
-        <h3>📌 Saved Tickers </h3>
-        <ul id="savedTickersList" class="saved-tickers-list"></ul>
+    <div class="tickers-dual-container" style="display: flex; gap: 20px;">
+        <div class="saved-tickers-container" style="flex: 1;">
+            <h3>📌 Saved Tickers</h3>
+            <ul id="savedTickersList" class="saved-tickers-list"></ul>
+        </div>
+
+        <div class="tickers-actions" style="display: flex; flex-direction: column; justify-content: center; gap: 10px;">
+            <button onclick="addToHistoricalTickers()" title="Add to Historical">➡️</button>
+            <button onclick="removeFromHistoricalTickers()" title="Remove from Historical">⬅️</button>
+        </div>
+
+        <div class="historical-tickers-container" style="flex: 1;">
+            <h3>📈 Historical Tickers</h3>
+            <p>Here you can add the tickers for which you want to download historical data, balances, etc</p>
+            <ul id="historicalTickersList" class="historical-tickers-list"></ul>
+        </div>
     </div>
 
     <nav class="navbar">
