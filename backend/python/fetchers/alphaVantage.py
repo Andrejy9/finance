@@ -13,67 +13,6 @@ from database.mongoFunctions import alphaVantage
 # 📌 Sostituisci con la tua API Key di Alpha Vantage
 API_KEY = settings.ALPHAVANTAGE_API_1
 
-def fetch_alpha_vantage_data(ticker, interval="5min", output_size="full", api_key=API_KEY):
-    """Scarica i dati storici da Alpha Vantage e li struttura in un DataFrame."""
-    
-    base_url = "https://www.alphavantage.co/query"
-    
-    params = {
-        "function": "TIME_SERIES_INTRADAY",
-        "symbol": ticker,
-        "interval": interval,
-        "apikey": api_key,
-        "outputsize": output_size
-    }
-    
-    response = requests.get(base_url, params=params)
-    data = response.json()
-    
-    # 🔹 Controllo errori: verifica se la risposta è valida
-    time_series_key = next((key for key in data.keys() if "Time Series" in key), None)
-    
-    if not time_series_key or time_series_key not in data:
-        print("❌ Errore: Nessun dato trovato per il ticker", ticker)
-        print("📌 Messaggio ricevuto:", data)
-        return None
-
-    # 🔹 Convertire in DataFrame
-    df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-    
-    # 🔹 Rinominare colonne per migliorare leggibilità
-    column_mapping = {
-        "1. open": "Apertura",
-        "2. high": "Massimo",
-        "3. low": "Minimo",
-        "4. close": "Chiusura",
-        "5. volume": "Volume"
-    }
-    
-    df.rename(columns=column_mapping, inplace=True)
-
-    # 🔹 Convertire i dati nei formati corretti
-    df.index = pd.to_datetime(df.index)
-    df = df.astype({"Apertura": float, "Massimo": float, "Minimo": float, "Chiusura": float, "Volume": int})
-
-    # 🔹 Strutturare i dati nel formato richiesto
-    df = df.reset_index().rename(columns={"index": "Data"})
-    df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-
-    return df
-
-# # 📌 Esegui il download dei dati per AAPL (Apple) con timeframe
-# dati = fetch_alpha_vantage_data("AAPL", interval="60min")
-
-# # 📌 Stampa solo i primi 5 risultati formattati
-# if dati is not None:
-#     print(dati.head())
-
-#     # 📌 Salva i dati in un file CSV
-#     dati.to_csv("AAPL_alpha_vantage.csv", index=False)
-#     save_path = os.path.join(os.getcwd(), "AAPL_alpha_vantage.csv")
-#     dati.to_csv(save_path, index=False)
-#     print(f"✅ Dati salvati in '{save_path}'")
-
 
 def fetch_alpha_vantage_full_history(ticker, interval="60min", api_key=API_KEY):
     """
@@ -90,61 +29,95 @@ def fetch_alpha_vantage_full_history(ticker, interval="60min", api_key=API_KEY):
 
     # Recupera la data più recente salvata
     last_date_str = get_last_date_for_ticker(db_name, collection_name, ticker)
-
-    # Parametri della chiamata API
-    params = {
-        "function": "TIME_SERIES_INTRADAY",
-        "symbol": ticker,
-        "interval": interval,
-        "apikey": api_key,
-        "outputsize": "full"
-    }
-
-    response = requests.get(base_url, params=params)
-    data = response.json()
-
-    time_series_key = next((key for key in data if "Time Series" in key), None)
-
-    if time_series_key and time_series_key in data:
-        df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
-        df.rename(columns={
-            "1. open": "Apertura",
-            "2. high": "Massimo",
-            "3. low": "Minimo",
-            "4. close": "Chiusura",
-            "5. volume": "Volume"
-        }, inplace=True)
-
-        df.index = pd.to_datetime(df.index)
-        df = df.astype({
-            "Apertura": float,
-            "Massimo": float,
-            "Minimo": float,
-            "Chiusura": float,
-            "Volume": int
-        })
-
-        df = df.reset_index().rename(columns={"index": "Data"})
-        df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
-        df["Ticker"] = ticker
-
-        # Se c'è una data salvata, filtra i nuovi record
-        if last_date_str:
-            df = df[df["Data"] > last_date_str]
-
-        # Salvataggio in MongoDB
-        if not df.empty:
-            alphaVantage.save_historicaldata_to_mongodb(
-                df.to_dict(orient="records"),
-                db_name,
-                collection_name
-            )
-            print(f"✅ Salvati {len(df)} nuovi record.")
-        else:
-            print("ℹ️ Nessun nuovo dato da salvare.")
-
+    
+    if last_date_str:
+        last_date = datetime.strptime(last_date_str, "%Y-%m-%d %H:%M")
     else:
-        print(f"⚠️ Errore nella risposta. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+        last_date = datetime.utcnow() - pd.DateOffset(years=10)  # Default to 10 years ago if no last date
+
+    current_date = datetime.utcnow()
+
+    all_data_fetched = True
+
+    start_date = last_date
+
+    while last_date < current_date:
+        month_date = last_date
+        month_str = last_date.strftime("%Y-%m")
+        
+        # Parametri della chiamata API
+        params = {
+            "function": "TIME_SERIES_INTRADAY",
+            "symbol": ticker,
+            "interval": interval,
+            "apikey": api_key,
+            "adjusted": "true",
+            "extended_hours": "true",
+            "month": month_str
+        }
+
+        response = requests.get(base_url, params=params)
+        data = response.json()
+
+        time_series_key = next((key for key in data if "Time Series" in key), None)
+
+        if time_series_key and time_series_key in data:
+            df = pd.DataFrame.from_dict(data[time_series_key], orient="index")
+            df.rename(columns={
+                "1. open": "Apertura",
+                "2. high": "Massimo",
+                "3. low": "Minimo",
+                "4. close": "Chiusura",
+                "5. volume": "Volume"
+            }, inplace=True)
+
+            df.index = pd.to_datetime(df.index)
+            df = df.astype({
+                "Apertura": float,
+                "Massimo": float,
+                "Minimo": float,
+                "Chiusura": float,
+                "Volume": int
+            })
+
+            df = df.reset_index().rename(columns={"index": "Data"})
+            df["Data"] = df["Data"].dt.strftime("%Y-%m-%d %H:%M")
+            df["Ticker"] = ticker
+
+            # Se c'è una data salvata, filtra i nuovi record
+            if last_date_str:
+                df = df[df["Data"] > last_date_str]
+
+            # Controllo sulla differenza tra oggi e l'ultima data
+            if not df.empty:
+                last_data_date = datetime.strptime(df["Data"].max(), "%Y-%m-%d %H:%M")
+                days_diff = (datetime.utcnow() - last_data_date).days
+                all_data_fetched = days_diff <= 10
+            else:
+                all_data_fetched = False
+
+            # Salvataggio in MongoDB
+            months_total = (current_date.year - start_date.year) * 12 + (current_date.month - start_date.month) + 1
+            months_done = (month_date.year - start_date.year) * 12 + (month_date.month - start_date.month) + 1
+            progress_percent = round((months_done / months_total) * 100, 2)
+            print(f"📊 Avanzamento: {progress_percent}% completato ({months_done}/{months_total} mesi)")
+
+            if not df.empty:
+                alphaVantage.save_historicaldata_to_mongodb(
+                    df.to_dict(orient="records"),
+                    db_name,
+                    collection_name
+                )
+                #print(f"✅ Salvati {len(df)} nuovi record.")
+            else:
+                print("ℹ️ Nessun nuovo dato da salvare.")
+        else:
+            print(f"⚠️ Errore nella risposta. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+
+        # Passa al mese successivo
+        last_date += pd.DateOffset(months=1)
+
+    return all_data_fetched
 
 def fetch_income_statement_and_save(ticker, api_key=API_KEY):
     """

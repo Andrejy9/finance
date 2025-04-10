@@ -3,6 +3,22 @@ from config.settings import settings
 from pymongo import MongoClient, UpdateOne
 from pymongo.errors import BulkWriteError
 
+# ───────────────────────────
+# 📁 Funzioni principali
+# ├── get_support_resistance_config
+# ├── save_tickers
+# ├── get_last_screener / update_last_screener
+# ├── get_last_date_for_ticker
+# ├── save_to_mongodb
+# ├── alphaVantage class:
+# │   ├── save_historicaldata_to_mongodb
+# │   ├── save_financial_reports_to_mongodb
+# │   ├── save_balance_sheets_to_mongodb
+# │   ├── save_dividends_to_mongodb
+# │   └── save_weekly_prices_to_mongodb
+# └── get_all_tickers_from_historical 🆕
+# ───────────────────────────
+
 DB_NAME = "tickers"
 
 # Connessione a MongoDB
@@ -61,8 +77,6 @@ def update_last_screener(screener_name):
     )
 
 
-
-
 def get_last_date_for_ticker(db_name, collection_name, ticker):
     """Recupera la data più recente salvata in MongoDB per un dato ticker."""
     db = client[db_name]
@@ -81,7 +95,7 @@ def get_last_date_for_ticker(db_name, collection_name, ticker):
         return None
 
 
-#funzione per salvare dati recenti su MongoDB
+# funzione per salvare dati recenti su MongoDB
 def save_to_mongodb(data, db_name, collection_name):
     client = MongoClient(settings.MONGODB_URI)
     try:
@@ -92,7 +106,7 @@ def save_to_mongodb(data, db_name, collection_name):
         documents = [doc for doc in (data if isinstance(data, list) else [data])]
         if not documents:
             print("⚠️ Nessun documento valido da processare")
-            return True  
+            return True
 
         print(f"📄 Documenti ricevuti: {documents}")
 
@@ -101,17 +115,19 @@ def save_to_mongodb(data, db_name, collection_name):
         for doc in documents:
             try:
                 # Verifica il formato della data
-                if 'Data' not in doc or not isinstance(doc['Data'], str):
-                    raise ValueError(f"❌ Documento non valido: {json.dumps(doc, default=str)}")
-                    
+                if "Data" not in doc or not isinstance(doc["Data"], str):
+                    raise ValueError(
+                        f"❌ Documento non valido: {json.dumps(doc, default=str)}"
+                    )
+
                 operations.append(
                     UpdateOne(
-                        {'Data': doc['Data']},
-                        {'$set': doc},  # 🔥 Adesso aggiorna il documento se esiste!
-                        upsert=True
+                        {"Data": doc["Data"]},
+                        {"$set": doc},  # 🔥 Adesso aggiorna il documento se esiste!
+                        upsert=True,
                     )
                 )
-                    
+
             except Exception as e:
                 print(f"⚠️ Documento scartato: {str(e)}")
                 continue
@@ -125,17 +141,18 @@ def save_to_mongodb(data, db_name, collection_name):
             result = collection.bulk_write(operations, ordered=False)
             inserted_count = result.upserted_count or 0
             modified_count = result.modified_count or 0
-            
+
             print(f"✅ Risultati operazione:")
             print(f"- 📌 Documenti aggiornati: {modified_count}")
             print(f"- 🆕 Nuovi documenti inseriti: {inserted_count}")
-            
+
             return True
 
         except BulkWriteError as bwe:
             print("❌ Errori durante l'operazione bulk:")
             import pprint
-            pprint.pprint(bwe.details)  
+
+            pprint.pprint(bwe.details)
             return False
 
     except Exception as e:
@@ -143,6 +160,18 @@ def save_to_mongodb(data, db_name, collection_name):
         return False
     finally:
         client.close()
+
+
+def get_all_tickers_from_historical():
+    """
+    Recupera tutti i ticker unici dalla collezione 'historicaltickers' nel database 'finance',
+    utilizzando il campo 'symbol'.
+    """
+    db = client["finance"]
+    collection = db["historicaltickers"]
+    tickers = collection.distinct("symbol")
+    print(f"🔍 Trovati {len(tickers)} ticker unici (campo 'symbol').")
+    return tickers
 
 
 class alphaVantage:
@@ -162,7 +191,9 @@ class alphaVantage:
             print(f"📅 Salvati {inserted_count} nuovi record in '{collection_name}'")
             return True
         else:
-            print(f"⚠️ Nessun nuovo dato inserito in '{collection_name}' (tutti duplicati)")
+            print(
+                f"⚠️ Nessun nuovo dato inserito in '{collection_name}' (tutti duplicati)"
+            )
             return False
 
     def save_financial_reports_to_mongodb(data, db_name, collection_name):
@@ -177,7 +208,7 @@ class alphaVantage:
         for record in data:
             query = {
                 "fiscalDateEnding": record["fiscalDateEnding"],
-                "Ticker": record["Ticker"]
+                "Ticker": record["Ticker"],
             }
             if not collection.find_one(query):
                 collection.insert_one(record)
@@ -187,9 +218,11 @@ class alphaVantage:
             print(f"📊 Salvati {inserted_count} nuovi report in '{collection_name}'")
             return True
         else:
-            print(f"⚠️ Nessun nuovo report inserito in '{collection_name}' (tutti duplicati)")
+            print(
+                f"⚠️ Nessun nuovo report inserito in '{collection_name}' (tutti duplicati)"
+            )
             return False
-    
+
     def save_balance_sheets_to_mongodb(data, db_name, collection_name):
         """
         Salva dati di balance sheet in MongoDB evitando duplicati
@@ -202,7 +235,7 @@ class alphaVantage:
         for record in data:
             query = {
                 "fiscalDateEnding": record["fiscalDateEnding"],
-                "Ticker": record["Ticker"]
+                "Ticker": record["Ticker"],
             }
             if not collection.find_one(query):
                 collection.insert_one(record)
@@ -212,7 +245,9 @@ class alphaVantage:
             print(f"📘 Salvati {inserted_count} balance sheet in '{collection_name}'")
             return True
         else:
-            print(f"⚠️ Nessun nuovo balance sheet inserito in '{collection_name}' (tutti duplicati)")
+            print(
+                f"⚠️ Nessun nuovo balance sheet inserito in '{collection_name}' (tutti duplicati)"
+            )
             return False
 
     def save_dividends_to_mongodb(data, db_name, collection_name):
@@ -223,7 +258,7 @@ class alphaVantage:
         for record in data:
             query = {
                 "ex_dividend_date": record.get("ex_dividend_date"),
-                "Ticker": record.get("Ticker")
+                "Ticker": record.get("Ticker"),
             }
             if not collection.find_one(query):
                 collection.insert_one(record)
@@ -233,9 +268,11 @@ class alphaVantage:
             print(f"💰 Salvati {inserted_count} nuovi dividendi in '{collection_name}'")
             return True
         else:
-            print(f"⚠️ Nessun nuovo dividendo inserito in '{collection_name}' (tutti duplicati)")
+            print(
+                f"⚠️ Nessun nuovo dividendo inserito in '{collection_name}' (tutti duplicati)"
+            )
             return False
-        
+
     def save_weekly_prices_to_mongodb(data, db_name, collection_name):
         """
         Salva dati settimanali dei prezzi in MongoDB evitando duplicati
@@ -246,17 +283,18 @@ class alphaVantage:
 
         inserted_count = 0
         for record in data:
-            query = {
-                "Date": record["Date"],
-                "Ticker": record["Ticker"]
-            }
+            query = {"Date": record["Date"], "Ticker": record["Ticker"]}
             if not collection.find_one(query):
                 collection.insert_one(record)
                 inserted_count += 1
 
         if inserted_count:
-            print(f"📈 Salvati {inserted_count} dati settimanali in '{collection_name}'")
+            print(
+                f"📈 Salvati {inserted_count} dati settimanali in '{collection_name}'"
+            )
             return True
         else:
-            print(f"⚠️ Nessun nuovo dato settimanale inserito in '{collection_name}' (tutti duplicati)")
+            print(
+                f"⚠️ Nessun nuovo dato settimanale inserito in '{collection_name}' (tutti duplicati)"
+            )
             return False

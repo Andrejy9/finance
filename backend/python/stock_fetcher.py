@@ -1,3 +1,7 @@
+# Questo script viene chiamato da un processo child in JavaScript
+# per scaricare i dati dei ticker utilizzando Yahoo Finance (yfinance) e salvarli su MongoDB
+# Restituisce un oggetto JSON come output.
+
 import sys
 import json
 from fetchers.yfinance import fetchTickerAndSave
