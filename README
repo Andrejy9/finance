@@ -1,9 +1,11 @@
-# Personal Finance
+# Finance
 
 ## Overview
-This project is a **finance management system** built with Python, Node.js, and MongoDB, designed to track and analyze a customizable list of financial tickers.
+This project is a **finance management system** built with Python, Node.js, and MongoDB, designed to track and analyze a customizable list of financial tickers.  
+In the future, the software will autonomously manage a portfolio of assets with advanced features such as automatic ticker evaluation and classification, backtesting of machine learning models, and experimentation with Quantum Machine Learning (QML).  
+All these components aim to optimize portfolio allocation, suggest entry and exit strategies, and ultimately maximize profitability.
 
-At the moment, historical data is downloaded manually, but the system is already structured to support automatic data collection using scraping scripts and rotating API keys. It's fully prepared for large-scale data processing, including cleaning, normalization, and the application of machine learning models to extract insights.
+At the moment, historical data is downloaded launching manually the test.py script, but the system is already structured to support automatic data collection using scraping scripts and rotating API keys (to be developed).
 
 Upcoming features include real-time market data scraping, deeper fundamental analysis, and AI-powered analytics. Looking ahead, the platform is designed to be flexible and forward-looking, with plans to experiment with advanced techniques like Quantum Machine Learning (QML) to further improve forecasting and decision-making.
 
@@ -80,4 +82,6 @@ Upcoming features include real-time market data scraping, deeper fundamental ana
 
 
 ## TODO
-- scrape data from https://finviz.com/quote.ashx?t=TSLA&ty=c&ta=1&p=d
+- Scrape data from https://finviz.com/quote.ashx?t=TSLA&ty=c&ta=1&p=d (low priority)
+- Normalize financial data and structure it into historical time series to make it suitable for ingestion by machine learning systems
+- Implement a classification machine learning algorithm to categorize tickers based on volatility and risk levels
