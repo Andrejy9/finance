@@ -84,4 +84,6 @@ Upcoming features include real-time market data scraping, deeper fundamental ana
 ## TODO
 - Scrape data from https://finviz.com/quote.ashx?t=TSLA&ty=c&ta=1&p=d (low priority)
 - Normalize financial data and structure it into historical time series to make it suitable for ingestion by machine learning systems
-- Implement a classification machine learning algorithm to categorize tickers based on volatility and risk levels
+- Implement a classification machine learning algorithm to categorize tickers based on volatility and risk levels  
+The classification algorithm will be inspired by the scientific article  
+**"A Machine Learning Framework for Stock Selection"**,(in research folder) which explores techniques for classifying financial assets based on risk and volatility indicators, including fundamental and technical metrics.
