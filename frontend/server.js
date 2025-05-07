@@ -5,7 +5,7 @@ const financialDataRoutes = require('./routes/financialData');
 const fetchDataRouters = require('./routes/fetchData');
 const technicalAnalysis = require('./routes/technicalAnalysis');
 const configuration = require('./routes/configuration');
-const tickerTracker = require('./routes/tickerTracker')
+const tickerTracker = require('./routes/tickerTracker');
 
 const app = configureExpress();
 const port = process.env.PORT || 5050;
@@ -20,6 +20,7 @@ app.use('/api', fetchDataRouters);
 app.use('/api', technicalAnalysis);
 app.use('/api', configuration);
 app.use('/api', tickerTracker);
+app.use('/api', require('./routes/donwloadHistoricalData'));
 
 // Gestione errori globale
 app.use((err, req, res, next) => {

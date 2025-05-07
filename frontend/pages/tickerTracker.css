@@ -89,3 +89,16 @@ body {
   .refresh-button:hover {
     background-color: #45a049;
   }
+
+  .download-output {
+    margin-top: 1em;
+    font-family: monospace;
+    background-color: #000;
+    color: #eee;
+    padding: 12px;
+    border: 1px solid #444;
+    max-height: 350px;
+    overflow-y: auto;
+    white-space: pre-line;
+    border-radius: 6px;
+  }

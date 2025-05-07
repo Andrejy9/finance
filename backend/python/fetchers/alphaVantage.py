@@ -6,6 +6,10 @@ from datetime import datetime
 from config.settings import settings
 from database.mongoFunctions import get_last_date_for_ticker
 from database.mongoFunctions import alphaVantage
+import sys
+import json
+
+
 
 # 25 requests per day, nel caso di download orario mi scarica 1 mese,
 # dovrei scaricare tutti i mesi per ciascun anno
@@ -101,6 +105,13 @@ def fetch_alpha_vantage_full_history(ticker, interval="60min", api_key=API_KEY):
             months_done = (month_date.year - start_date.year) * 12 + (month_date.month - start_date.month) + 1
             progress_percent = round((months_done / months_total) * 100, 2)
             print(f"📊 Avanzamento: {progress_percent}% completato ({months_done}/{months_total} mesi)")
+            print(json.dumps({
+                 "type": "month_progress",
+                 "progress_percent": progress_percent,
+                 "months_done": months_done,
+                 "months_total": months_total
+                 }))
+            sys.stdout.flush()
 
             if not df.empty:
                 alphaVantage.save_historicaldata_to_mongodb(
@@ -113,6 +124,13 @@ def fetch_alpha_vantage_full_history(ticker, interval="60min", api_key=API_KEY):
                 print("ℹ️ Nessun nuovo dato da salvare.")
         else:
             print(f"⚠️ Errore nella risposta. Messaggio: {data.get('Note') or data.get('Error Message') or data}")
+            print(json.dumps({
+                "type": "error",
+                "ticker": ticker,
+                "message": data.get("Note") or data.get("Error Message") or str(data)
+                }))
+            sys.stdout.flush()
+            
 
         # Passa al mese successivo
         last_date += pd.DateOffset(months=1)
