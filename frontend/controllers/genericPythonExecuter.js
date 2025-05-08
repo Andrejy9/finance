@@ -11,8 +11,8 @@ exports.runPythonScript = async (script, params = []) => {
         }
 
         const scriptPath = path.resolve(__dirname, `../../backend/python/${script}.py`);
-
-        const pythonProcess = spawn('python3', [scriptPath, ...params]);
+        const pythonPath = path.resolve(__dirname, '../../backend/python/venv310/bin/python');
+        const pythonProcess = spawn(pythonPath, [scriptPath, ...params]);
 
         let outputBuffer = '';
         let errorBuffer = '';

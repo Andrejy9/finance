@@ -10,7 +10,8 @@ exports.fetch_all_historical_data = async (req, res) => {
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
 
-    const pythonProcess = spawn('python3', [pathToScript, 'test', 'fetch_all_historical_data']);
+    const venvPythonPath = path.resolve(__dirname, '../../backend/python/venv310/bin/python');
+    const pythonProcess = spawn(venvPythonPath, [pathToScript, 'test', 'fetch_all_historical_data']);
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n').filter(Boolean);

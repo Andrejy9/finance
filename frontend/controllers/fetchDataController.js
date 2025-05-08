@@ -17,7 +17,8 @@ exports.fetchAndSaveStockData = async (req, res) => {
         '../../backend/python/stock_fetcher.py'
     );
 
-    const pythonProcess = spawn('python3', [scriptPath, symbol.toUpperCase(), timeframe]);
+    const venvPythonPath = path.resolve(__dirname, '../../backend/python/venv310/bin/python');
+    const pythonProcess = spawn(venvPythonPath, [scriptPath, symbol.toUpperCase(), timeframe]);
     let outputBuffer = '';
     let errorBuffer = '';
     let timeoutId;

@@ -7,6 +7,7 @@ __pycache__/
 # Escludi il virtual environment (venv)
 venv/
 .venv/
+venv310/
 
 # Escludi le librerie installate
 *.egg-info/
