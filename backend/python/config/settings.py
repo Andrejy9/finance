@@ -9,5 +9,6 @@ class Settings:
     FMP_API_KEY = "EwQ619E1ipgAvXNO7KbubN6RuyO0aKqO"
     DB_NAME_FUNDAMENTALS = "fundamentalsDB"
     DB_NAME_WEEKLY_TICKERS = "weeklyPrices"
+    POLYGON_API_KEY ="aDVdprVY35hpUywRcli2tw9ydwDHVMeZ"
     
 settings = Settings()

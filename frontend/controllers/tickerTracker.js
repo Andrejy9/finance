@@ -6,11 +6,11 @@ exports.getHistoricalTickersStatus = async (req, res) => {
     const tickerStatuses = [];
 
     // ---------- ANALISI finance_historical ----------
-    const financeHistoricalDb = mongoose.connection.useDb("finance_historical");
+    const financeHistoricalDb = mongoose.connection.useDb("polygon_historical");
     const financeCollections = await financeHistoricalDb.db.listCollections().toArray();
     const financeCollectionNames = financeCollections.map(c => c.name);
 
-    const expectedOldestDate = moment().subtract(5, 'years');
+    const expectedOldestDate = moment().subtract(2, 'years');
     const totalExpectedDays = moment().diff(expectedOldestDate, 'days');
 
     for (const collectionName of financeCollectionNames) {

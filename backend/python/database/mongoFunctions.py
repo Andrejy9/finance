@@ -76,7 +76,6 @@ def update_last_screener(screener_name):
         {"_id": "last_screener"}, {"$set": {"screener": screener_name}}, upsert=True
     )
 
-
 def get_last_date_for_ticker(db_name, collection_name, ticker):
     """Recupera la data più recente salvata in MongoDB per un dato ticker."""
     db = client[db_name]
@@ -297,4 +296,107 @@ class alphaVantage:
             print(
                 f"⚠️ Nessun nuovo dato settimanale inserito in '{collection_name}' (tutti duplicati)"
             )
+            return False
+
+class polygonIO:
+    def save_historicaldata_to_mongodb(data, db_name, collection_name):
+        db = client[db_name]
+        collection = db[collection_name]
+        inserted_count = 0
+        for record in data:
+            # Adattamento della chiave primaria e nomenclatura coerente
+            data_key = record.get("Data")
+            ticker_key = record.get("Ticker")
+
+            if not data_key or not ticker_key:
+                print(f"⚠️ Record scartato (manca 'Data' o 'Ticker'): {record}")
+                continue
+
+            query = {
+                "Data": data_key,
+                "Ticker": ticker_key,
+            }
+
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📅 Salvati {inserted_count} record storici in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dato storico in '{collection_name}' (tutti duplicati)")
+            return False
+    
+    def save_financial_reports_to_mongodb(data, db_name, collection_name):
+        """
+        Salva report finanziari (annual o quarterly) in MongoDB evitando duplicati
+        su 'fiscal_period' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "fiscal_period": record.get("fiscal_period"),
+                "Ticker": record.get("Ticker"),
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📊 Salvati {inserted_count} financial reports in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo financial report in '{collection_name}' (tutti duplicati)")
+            return False
+
+    def save_dividends_to_mongodb(data, db_name, collection_name):
+        """
+        Salva dividendi in MongoDB evitando duplicati su 'declaration_date' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "declaration_date": record.get("declaration_date"),
+                "Ticker": record.get("Ticker"),
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"💰 Salvati {inserted_count} dividendi in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dividendo in '{collection_name}' (tutti duplicati)")
+            return False
+
+    def save_weekly_prices_to_mongodb(data, db_name, collection_name):
+        """
+        Salva dati settimanali in MongoDB evitando duplicati per 'Date' e 'Ticker'.
+        """
+        db = client[db_name]
+        collection = db[collection_name]
+
+        inserted_count = 0
+        for record in data:
+            query = {
+                "Date": record.get("Date"),
+                "Ticker": record.get("Ticker"),
+            }
+            if not collection.find_one(query):
+                collection.insert_one(record)
+                inserted_count += 1
+
+        if inserted_count:
+            print(f"📈 Salvati {inserted_count} dati settimanali in '{collection_name}'")
+            return True
+        else:
+            print(f"⚠️ Nessun nuovo dato settimanale in '{collection_name}' (tutti duplicati)")
             return False

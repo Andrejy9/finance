@@ -55,7 +55,7 @@ exports.getHistoricalFinancialData = async (req, res) => {
         }
 
         // Connessione al database MongoDB
-        const financialDb = mongoose.connection.useDb("finance_historical");
+        const financialDb = mongoose.connection.useDb("polygon_historical");
         const collection = financialDb.collection(`${ticker}_${timeframe}`); // 🔹 Usa una collezione separata per ogni timeframe
 
         // Recupera i dati filtrati
